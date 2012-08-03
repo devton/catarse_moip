@@ -1,7 +1,5 @@
 module CatarseMoip::Payment
   class MoipController < ApplicationController
-    before_filter :setup_moip
-
     def checkout
       @backer = current_user.backs.not_confirmed.find params[:id]
       #begin
@@ -14,19 +12,11 @@ module CatarseMoip::Payment
         #Airbrake.notify({ :error_class => "Checkout MOIP Error", :error_message => "MOIP Error: #{e.inspect}", :parameters => params}) rescue nil
         #Rails.logger.info "-----> #{e.inspect}"
         #flash[:failure] = t('projects.backers.checkout.moip_error')
-        #return redirect_to main_app.new_project_backer_path(@backer.project)        #
+        #return redirect_to main_app.new_project_backer_path(@backer.project)
       #end
     end
 
     protected
-
-    def setup_moip
-      MoIP.setup do |config|
-        config.uri = (::Configuration[:moip_uri] || 'https://moip.com.br/')
-        config.token = ::Configuration[:moip_token]
-        config.key = ::Configuration[:moip_key]
-      end
-    end
 
     def payer_info
       {
