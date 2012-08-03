@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     catarse_moip (0.0.1)
-      moip (~> 2.1.1)
+      moip (~> 1.0.4)
       rails (~> 3.2.6)
 
 GEM
@@ -57,7 +57,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.19)
-    moip (2.1.2)
+    moip (1.0.4)
       activesupport (>= 2.3.2)
       httparty (~> 0.8.1)
       moip

@@ -41,7 +41,7 @@ describe CatarseMoip::Payment::MoipController do
     context 'throught moip' do
       context 'when raise something' do
         before do
-          MoIP.stub(:checkout).and_raise(StandardError)
+          MoIP::Client.stub(:checkout).and_raise(StandardError)
         end
 
         it 'should handle the error and redirect' do
@@ -59,7 +59,7 @@ describe CatarseMoip::Payment::MoipController do
 
       context 'without error' do
         before do
-          MoIP.stub(:checkout).and_return({'Token' => 'ABCD'})
+          MoIP::Client.stub(:checkout).and_return({'Token' => 'ABCD'})
         end
 
         it 'should redirect to moip, setup session payment_token and update backer with token' do
