@@ -15,7 +15,7 @@ describe CatarseMoip::Payment::MoipController do
     context 'found some errors' do
       it 'should raise a error when current_user is not present' do
         lambda {
-          post :checkout, { id: 10, locale: 'en', use_route: 'catarse_moip' }
+          post :pay, { id: 10, locale: 'en', use_route: 'catarse_moip' }
         }.should raise_exception
       end
 
@@ -24,7 +24,7 @@ describe CatarseMoip::Payment::MoipController do
         backer = Factory(:backer, confirmed: true, user: current_user)
 
         lambda {
-          post :checkout, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
+          post :pay, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
         }.should raise_exception ActiveRecord::RecordNotFound
       end
 
@@ -33,7 +33,7 @@ describe CatarseMoip::Payment::MoipController do
         backer = Factory(:backer)
 
         lambda {
-          post :checkout, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
+          post :pay, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
         }.should raise_exception ActiveRecord::RecordNotFound
       end
     end
@@ -48,7 +48,7 @@ describe CatarseMoip::Payment::MoipController do
           sign_in(current_user)
           backer = Factory(:backer, confirmed: false, user: current_user)
 
-          post :checkout, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
+          post :pay, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
           backer.reload
 
           backer.payment_token.should be_nil
@@ -66,7 +66,7 @@ describe CatarseMoip::Payment::MoipController do
           sign_in(current_user)
           backer = Factory(:backer, confirmed: false, user: current_user)
 
-          post :checkout, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
+          post :pay, { id: backer.id, locale: 'en', use_route: 'catarse_moip' }
           backer.reload
 
           backer.payment_token.should == 'ABCD'

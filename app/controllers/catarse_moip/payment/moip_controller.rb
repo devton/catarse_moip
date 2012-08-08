@@ -1,19 +1,19 @@
 module CatarseMoip::Payment
   class MoipController < ApplicationController
-    def checkout
+    def pay
       @backer = current_user.backs.not_confirmed.find params[:id]
-      #begin
+      begin
         response = MoIP::Client.checkout(payment_info)
         @backer.update_attribute :payment_token, response["Token"]
         session[:_payment_token] = response["Token"]
 
         redirect_to MoIP::Client.moip_page(response["Token"])
-      #rescue Exception => e
-        #Airbrake.notify({ :error_class => "Checkout MOIP Error", :error_message => "MOIP Error: #{e.inspect}", :parameters => params}) rescue nil
-        #Rails.logger.info "-----> #{e.inspect}"
-        #flash[:failure] = t('projects.backers.checkout.moip_error')
-        #return redirect_to main_app.new_project_backer_path(@backer.project)
-      #end
+      rescue Exception => e
+        Airbrake.notify({ :error_class => "Checkout MOIP Error", :error_message => "MOIP Error: #{e.inspect}", :parameters => params}) rescue nil
+        Rails.logger.info "-----> #{e.inspect}"
+        flash[:failure] = t('projects.backers.checkout.moip_error')
+        return redirect_to main_app.new_project_backer_path(@backer.project)
+      end
     end
 
     protected

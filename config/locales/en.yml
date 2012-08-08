@@ -1,0 +1,7 @@
+en:
+  projects:
+    backers:
+      checkout:
+        moip_error: "Ooops. There was an error while sending your payment to MoIP. Please try again."
+        success: "Your back was successfully made. Thanks a lot!"
+
