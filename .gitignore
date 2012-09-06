@@ -1,9 +1,4 @@
 .bundle/
 log/*.log
 pkg/
-test/dummy/db/*.sqlite3
-test/dummy/log/*.log
-test/dummy/tmp/
-test/dummy/.sass-cache
-test/dummy
 catarse_moip-0.0.2.gem
