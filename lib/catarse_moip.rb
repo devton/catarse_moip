@@ -1,5 +1,5 @@
 require "catarse_moip/engine"
-require "moip"
+#require "moip"
 
 module CatarseMoip
 end

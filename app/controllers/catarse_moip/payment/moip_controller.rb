@@ -1,5 +1,44 @@
+#require 'moip-transparente'
 module CatarseMoip::Payment
   class MoipController < ApplicationController
+    layout :false
+
+    def review
+    end
+
+    def get_moip_token
+      @backer = current_user.backs.not_confirmed.find params[:id]
+
+      ::Moip::Config.access_token = ::Configuration[:moip_token]
+      ::Moip::Config.access_key = ::Configuration[:moip_key]
+
+      @moip = ::Moip::Checkout.new
+
+      invoice = {
+        razao: "Apoio para o projeto '#{@backer.project.name}'",
+        id: @backer.key,
+        total: @backer.value.to_s,
+        acrescimo: '0.00',
+        desconto: '0.00',
+        cliente: {
+          id: @backer.user.id,
+          nome: @backer.payer_name,
+          email: @backer.payer_email,
+          logradouro: "#{@backer.address_street}, #{@backer.payer_address_number}",
+          complemento: @backer.address_complement,
+          bairro: @backer.address_neighbourhood,
+          cidade: @backer.address_city,
+          uf: @backer.address_state,
+          cep: @backer.address_zip_code,
+          telefone: @backer.address_phone_number
+        }
+      }
+
+      @moip.get_token(invoice)
+
+      render json: { moip: @moip }
+    end
+
     def pay
       @backer = current_user.backs.not_confirmed.find params[:id]
       begin

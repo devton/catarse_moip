@@ -9,6 +9,7 @@ source 'http://gems.github.com'
 
 gem 'rails', '3.2.7'
 gem 'rake', '0.9.2.2'
+gem 'moip-transparente', path: '~/store/code/moip-transparente', require: 'moip'
 
 # Database and data related [Putting pg to the end because of a weird bug with Lion, pg and openssl]
 gem 'pg'
@@ -17,7 +18,7 @@ gem 'activerecord-postgresql-adapter'
 
 gem 'catarse_paypal_express', '~> 0.0.2'
 #gem 'catarse_moip', '~> 0.1.1'
-gem 'moip_catarse', '~> 1.0.6', require: 'moip'
+#gem 'moip_catarse', '~> 1.0.6', require: 'moip'
 
 gem 'maxim-sexy_pg_constraints'
 gem 'dalli'
