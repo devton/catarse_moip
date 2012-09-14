@@ -27,13 +27,21 @@ module CatarseMoip
         )
       end
 
-      def process!(backer, params)
-        backer.payment_notifications.create! extra_data: params
+      def initialize(backer)
+        @backer = backer
+      end
+
+      def update_backer
+      end
+
+      def process!(params)
+        update_backer if @backer.payment_id.nil?
+        @backer.payment_notifications.create! extra_data: params
         case params[:status_pagamento].to_i
         when TransactionStatus::AUTHORIZED
-          backer.confirm! if not backer.confirmed
+          @backer.confirm! unless @backer.confirmed
         when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
-          backer.refund! unless backer.refunded?
+          @backer.refund! unless @backer.refunded?
         end
       end
     end

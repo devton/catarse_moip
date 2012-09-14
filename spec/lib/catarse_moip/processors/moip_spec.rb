@@ -40,12 +40,34 @@ describe CatarseMoip::Processors::Moip do
 
   let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>2190, "cod_moip"=>12345123, "forma_pagamento"=>1, "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com"} }
   let(:backer){ create(:backer, :confirmed => false, :refunded => false) }
-  let(:processor){ CatarseMoip::Processors::Moip.new }
+  let(:processor){ CatarseMoip::Processors::Moip.new backer }
 
   describe "#process!" do
+    context "when we already have the payment_id in backers table" do
+      before do
+        backer.update_attributes :payment_id => 'test'
+        processor.should_not_receive(:update_backer)
+      end
+
+      it 'should call update_backer on the processor' do
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
+      end
+    end
+
+    context "when we still do not have the payment_id in backers table" do
+      before do
+        backer.update_attributes :payment_id => nil
+        processor.should_receive(:update_backer)
+      end
+
+      it 'should call update_backer on the processor' do
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
+      end
+    end
+
     context "when there is a written back request" do
       before do
-        processor.process! backer, post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK})
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK})
       end
 
       it 'should mark refunded to true' do
@@ -60,7 +82,7 @@ describe CatarseMoip::Processors::Moip do
 
     context "when there is an authorized request" do
       before do
-        processor.process! backer, post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
       end
 
       it 'should mark refunded to true' do
@@ -79,7 +101,7 @@ describe CatarseMoip::Processors::Moip do
 
     context "when there is a refund request" do
       before do
-        processor.process! backer, post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED})
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED})
       end
 
       it 'should mark refunded to true' do
