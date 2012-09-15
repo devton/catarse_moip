@@ -42,7 +42,23 @@ describe CatarseMoip::Processors::Moip do
   let(:backer){ create(:backer, :confirmed => false, :refunded => false) }
   let(:processor){ CatarseMoip::Processors::Moip.new backer }
 
+  describe "#update_backer" do
+    before do
+      backer.update_attributes :payment_id => nil
+      MoIP::Client.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+      processor.update_backer
+    end
+
+    it("should assign payment_id"){ backer.payment_id.should == moip_query_response["Autorizacao"]["Pagamento"]["CodigoMoIP"] }
+    it("should assign payment_choice"){ backer.payment_choice.should == moip_query_response["Autorizacao"]["Pagamento"]["FormaPagamento"] }
+    it("should assign payment_service_fee"){ backer.payment_service_fee.to_s.should == moip_query_response["Autorizacao"]["Pagamento"]["TaxaMoIP"] }
+  end
+
   describe "#process!" do
+    before do
+      processor.stub(:update_backer)
+    end
+
     context "when we already have the payment_id in backers table" do
       before do
         backer.update_attributes :payment_id => 'test'
