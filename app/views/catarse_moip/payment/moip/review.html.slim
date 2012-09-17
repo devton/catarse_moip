@@ -4,6 +4,8 @@
     = label_tag 'user_document', t('projects.backers.review.form.labels.document')
     = text_field_tag 'user_document', nil, { autocomplete: 'off' }
 
+= javascript_include_tag 'https://www.moip.com.br/transparente/MoipWidget-v2.js'
+
   /= form.inputs do             
     /= form.input :cpf, :as => :string, :input_html => {:autocomplete => 'off'}
   /.list_payment

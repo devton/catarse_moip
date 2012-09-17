@@ -9,10 +9,10 @@ module CatarseMoip::Payment
     def get_moip_token
       @backer = current_user.backs.not_confirmed.find params[:id]
 
-      ::Moip::Config.access_token = ::Configuration[:moip_token]
-      ::Moip::Config.access_key = ::Configuration[:moip_key]
+      CatarseMoip::Checkout::Config.access_token = ::Configuration[:moip_token]
+      CatarseMoip::Checkout::Config.access_key = ::Configuration[:moip_key]
 
-      @moip = ::Moip::Checkout.new
+      @moip = CatarseMoip::Checkout::Checkout.new
 
       invoice = {
         razao: "Apoio para o projeto '#{@backer.project.name}'",
@@ -24,7 +24,7 @@ module CatarseMoip::Payment
           id: @backer.user.id,
           nome: @backer.payer_name,
           email: @backer.payer_email,
-          logradouro: "#{@backer.address_street}, #{@backer.payer_address_number}",
+          logradouro: "#{@backer.address_street}, #{@backer.address_number}",
           complemento: @backer.address_complement,
           bairro: @backer.address_neighbourhood,
           cidade: @backer.address_city,
@@ -36,7 +36,7 @@ module CatarseMoip::Payment
 
       @moip.get_token(invoice)
 
-      render json: { moip: @moip }
+      render json: { moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
 
     def pay

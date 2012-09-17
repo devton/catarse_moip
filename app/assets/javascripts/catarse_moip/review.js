@@ -18,7 +18,7 @@ var reviewRequest = {
       });
 
       $.post('/payment/moip/'+backer_id+'/get_moip_token', function(response){
-        console.log(response);
+        $('#footer').prepend(response.widget_tag)
       });
 
     } else {

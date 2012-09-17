@@ -25,6 +25,7 @@ PATH
   remote: .
   specs:
     catarse_moip (0.1.1)
+      libxml-ruby (~> 2.3.3)
       rails (~> 3.2.6)
 
 PATH
