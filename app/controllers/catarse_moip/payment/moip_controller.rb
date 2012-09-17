@@ -9,10 +9,10 @@ module CatarseMoip::Payment
     def get_moip_token
       @backer = current_user.backs.not_confirmed.find params[:id]
 
-      CatarseMoip::Checkout::Config.access_token = ::Configuration[:moip_token]
-      CatarseMoip::Checkout::Config.access_key = ::Configuration[:moip_key]
+      ::MoipTransparente::Config.access_token = ::Configuration[:moip_token]
+      ::MoipTransparente::Config.access_key = ::Configuration[:moip_key]
 
-      @moip = CatarseMoip::Checkout::Checkout.new
+      @moip = ::MoipTransparente::Checkout.new
 
       invoice = {
         razao: "Apoio para o projeto '#{@backer.project.name}'",

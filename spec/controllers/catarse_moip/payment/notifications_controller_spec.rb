@@ -17,7 +17,7 @@ describe CatarseMoip::Payment::NotificationsController do
 
     context "when we seach for an existing backer" do
       before do
-        CatarseMoip::Processors::Moip.any_instance.should_receive(:process!).with(backer, {"id_transacao"=>backer.key, "controller"=>"catarse_moip/payment/notifications", "action"=>"create"})
+        CatarseMoip::Processors::Moip.any_instance.should_receive(:process!).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/payment/notifications", "action"=>"create"})
         post :create, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
       end
 
