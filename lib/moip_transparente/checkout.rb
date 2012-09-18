@@ -108,26 +108,28 @@ class MoipTransparente::Checkout
     unica << pagador    
     
     parcelamentos = XML::Node.new('Parcelamentos')
-    invoice[:parcelamentos].each do |parcelamento_item|
-      parcelamento = XML::Node.new('Parcelamento')                
-      minimo = XML::Node.new('MinimoParcelas')
-      minimo << parcelamento_item[:minimo]
-      parcelamento << minimo
+    if invoice[:parcelamentos].present?
+      invoice[:parcelamentos].each do |parcelamento_item|
+        parcelamento = XML::Node.new('Parcelamento')                
+        minimo = XML::Node.new('MinimoParcelas')
+        minimo << parcelamento_item[:minimo]
+        parcelamento << minimo
 
-      maximo = XML::Node.new('MaximoParcelas')
-      maximo << parcelamento_item[:maximo]
-      parcelamento << maximo
+        maximo = XML::Node.new('MaximoParcelas')
+        maximo << parcelamento_item[:maximo]
+        parcelamento << maximo
 
-      if parcelamento_item[:repassar]
-        repassar = XML::Node.new('Repassar')
-        repassar << '1'
-        parcelamento << repassar
-      else
-        juros = XML::Node.new('Juros')
-        juros <<  parcelamento_item[:juros]        
-        parcelamento << juros
-      end  
-      parcelamentos << parcelamento          
+        if parcelamento_item[:repassar]
+          repassar = XML::Node.new('Repassar')
+          repassar << '1'
+          parcelamento << repassar
+        else
+          juros = XML::Node.new('Juros')
+          juros <<  parcelamento_item[:juros]        
+          parcelamento << juros
+        end  
+        parcelamentos << parcelamento          
+      end
     end
     
     unica << parcelamentos
@@ -179,7 +181,7 @@ class MoipTransparente::Checkout
 private
   
   def get_token_url
-    if Moip::Config.test?
+    if ::MoipTransparente::Config.test?
       return "https://desenvolvedor.moip.com.br/sandbox/ws/alpha/EnviarInstrucao/Unica"
     else
       return "https://www.moip.com.br/ws/alpha/EnviarInstrucao/Unica"
@@ -187,7 +189,7 @@ private
   end
 
   def get_javascript_url
-    if Moip::Config.test?
+    if ::MoipTransparente::Config.test?
       return "https://desenvolvedor.moip.com.br/sandbox/transparente/MoipWidget-v2.js"
     else
       return "https://www.moip.com.br/transparente/MoipWidget-v2.js"
@@ -202,7 +204,7 @@ private
     #http.set_debug_output $stderr if Moip::Config.test?
     
     request = Net::HTTP::Post.new(uri.path)
-    request.basic_auth Moip::Config.access_token, Moip::Config.access_key
+    request.basic_auth ::MoipTransparente::Config.access_token, ::MoipTransparente::Config.access_key
     
     request.body = xml
     response = http.start {|r| r.request request }

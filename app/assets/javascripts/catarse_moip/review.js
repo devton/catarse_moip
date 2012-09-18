@@ -2,8 +2,8 @@ var reviewRequest = {
   getMoipToken: function() {
     $documentField = $('input#user_document');
 
-    var backer_id = $('input#backer_id').val();
-    var project_id = $('input#project_id').val();
+    var backerId = $('input#backer_id').val();
+    var projectId = $('input#project_id').val();
 
     var documentNumber = $documentField.val();
     var resultCpf = documentValidation.validateCpf(documentNumber);
@@ -13,18 +13,32 @@ var reviewRequest = {
       $documentField.addClass('ok').removeClass('error');
       $documentField.attr('disabled', true);
 
-      $.post('/projects/'+project_id+'/backers/'+backer_id+'/update_info', {
+      $.post('/projects/'+projectId+'/backers/'+backerId+'/update_info', {
         backer: { payer_document: documentNumber }
       });
 
-      $.post('/payment/moip/'+backer_id+'/get_moip_token', function(response){
-        $('#footer').prepend(response.widget_tag)
+      $.post('/payment/moip/'+backerId+'/get_moip_token', function(response, textStatus){
+        $('#footer').prepend(response.widget_tag);
+        if(textStatus == 'success') {
+          reviewRequest.observePaymentTypeSelection();
+        }
       });
 
     } else {
       $documentField.addClass('error').removeClass('ok');
     }
-  }
+  },
+
+  observePaymentTypeSelection: function() {
+    $('.next_step_after_valid_document').fadeIn(300);
+    $('.list_payment input').change(function(e){
+      $('.payment_section').fadeOut(300, function(){
+        var currentElementId = $(e.currentTarget).attr('id');
+        $('#'+currentElementId+'_section').fadeIn(300);
+      });
+    });
+  },
+
 }
 
 var documentValidation = {

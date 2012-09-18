@@ -1,4 +1,4 @@
-#require 'moip-transparente'
+require 'moip_transparente'
 module CatarseMoip::Payment
   class MoipController < ApplicationController
     layout :false
