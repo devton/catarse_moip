@@ -107,8 +107,8 @@ class MoipTransparente::Checkout
     pagador << endereco
     unica << pagador    
     
-    parcelamentos = XML::Node.new('Parcelamentos')
-    if invoice[:parcelamentos].present?
+    if invoice[:parcelamentos]
+      parcelamentos = XML::Node.new('Parcelamentos')
       invoice[:parcelamentos].each do |parcelamento_item|
         parcelamento = XML::Node.new('Parcelamento')                
         minimo = XML::Node.new('MinimoParcelas')
@@ -130,9 +130,9 @@ class MoipTransparente::Checkout
         end  
         parcelamentos << parcelamento          
       end
+
+      unica << parcelamentos
     end
-    
-    unica << parcelamentos
     
     comissoes = XML::Node.new('Comissoes')                
     if invoice[:comissoes]
@@ -167,7 +167,7 @@ class MoipTransparente::Checkout
     
     doc.root << unica    
 
-    parser = XML::Parser.string(post_data(doc.to_s))
+    parser = XML::Parser.string(post_data(doc.to_s(:encoding => XML::Encoding::ISO_8859_1)))
     dom = parser.parse 
     resposta = dom.find('./Resposta').first
     if resposta.find('Status')[0].content  == 'Sucesso'

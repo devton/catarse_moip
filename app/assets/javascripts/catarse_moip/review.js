@@ -1,3 +1,18 @@
+var checkoutFailure = function(data) {
+  console.log('error -> ', data);
+}
+
+var checkoutSuccessful = function(data) {
+  if(data.StatusPagamento == 'Sucesso') {
+    if(data.url) {
+      var link = $('<a target="__blank">'+data.url+'</a>')
+      link.attr('href', data.url);
+      $('.link_content').empty().html(link);
+      $('.subtitle').fadeIn(300);
+    }
+  }
+}
+
 var reviewRequest = {
   getMoipToken: function() {
     $documentField = $('input#user_document');
@@ -18,7 +33,7 @@ var reviewRequest = {
       });
 
       $.post('/payment/moip/'+backerId+'/get_moip_token', function(response, textStatus){
-        $('#footer').prepend(response.widget_tag);
+        $('#catarse_moip_form').prepend(response.widget_tag);
         if(textStatus == 'success') {
           reviewRequest.observePaymentTypeSelection();
         }
@@ -35,9 +50,26 @@ var reviewRequest = {
       $('.payment_section').fadeOut(300, function(){
         var currentElementId = $(e.currentTarget).attr('id');
         $('#'+currentElementId+'_section').fadeIn(300);
+        reviewRequest.observeBoletoLink();
       });
     });
   },
+
+  observeBoletoLink: function() {
+    $('input#build_boleto').click(function(e){
+      e.preventDefault();
+      $('.list_payment input').attr('disabled', true);
+      var settings = {
+        "Forma":"BoletoBancario"
+      }
+      MoipWidget(settings);
+    });
+    
+    $('.link_content a').live('click', function(e){
+      location.href="/thank_you";
+    });
+
+  }
 
 }
 

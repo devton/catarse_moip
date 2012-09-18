@@ -60,6 +60,11 @@
             = submit_tag t('projects.backers.review.form.labels.submit'), :disabled => true, :class => 'btn btn-primary btn-large', :id => "backer_submit"
       #payment_type_boleto_section.hide.payment_section
         h3= t('projects.backers.review.form.labels.payment_boleto')
+        p.subtitle.hide= t('projects.backers.review.form.labels.payment_boleto_subtitle')
+        .clearfix
+        .link_content
+          .bootstrap-twitter
+            = submit_tag t('projects.backers.review.form.labels.build_boleto'), :class => 'btn btn-primary btn-large', :id => "build_boleto"
   
 
 = javascript_include_tag 'https://www.moip.com.br/transparente/MoipWidget-v2.js'

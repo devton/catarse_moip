@@ -34,7 +34,13 @@ module CatarseMoip::Payment
         }
       }
 
-      @moip.get_token(invoice)
+      response = @moip.get_token(invoice)
+
+      session[:thank_you_id] = @backer.project.id
+
+      if response and response[:token]
+        @backer.update_column :payment_token, response[:token]
+      end
 
       render json: { moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
