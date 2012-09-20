@@ -3,6 +3,7 @@ var checkoutFailure = function(data) {
 }
 
 var checkoutSuccessful = function(data) {
+  console.log('ok ->', data)
   if(data.StatusPagamento == 'Sucesso') {
     if(data.url) {
       var link = $('<a target="__blank">'+data.url+'</a>')
@@ -11,6 +12,38 @@ var checkoutSuccessful = function(data) {
       $('.subtitle').fadeIn(300);
     }
   }
+}
+
+var validators = {
+  hasContent: function(element) {
+    var value = $(element).val().replace(/[\-\.\_\/\s]/g, '');
+    if(value && value.length > 0){
+      $(element).addClass("ok").removeClass("error")
+      return true
+    } else {
+      $(element).addClass("error").removeClass("ok")
+      return false
+    }
+  }
+}
+
+var creditCardInputValidator = function() {
+  all_ok = true;
+
+  $.each($('#payment_type_cards_section input[type="text"]'), function(i, item){
+    if($(item).attr('id') != 'payment_card_flag') {
+      if(!validators.hasContent(item)){
+        all_ok = false
+      }
+    }
+  });
+
+  if(all_ok) {
+    $('input#credit_card_submit').attr('disabled', false);
+  } else {
+    $('input#credit_card_submit').attr('disabled', true);
+  }
+
 }
 
 var reviewRequest = {
@@ -46,14 +79,24 @@ var reviewRequest = {
 
   observePaymentTypeSelection: function() {
     $('.next_step_after_valid_document').fadeIn(300);
-    $('.list_payment input').change(function(e){
+
+    $('.list_payment input').live('change', function(e){
       $('.payment_section').fadeOut(300, function(){
         var currentElementId = $(e.currentTarget).attr('id');
         $('#'+currentElementId+'_section').fadeIn(300);
         reviewRequest.observeBoletoLink();
+        reviewRequest.observeCreditCardLink();
       });
     });
+
+    $('.list_payment input#payment_type_cards').click();
+
+    $('input#payment_card_date').mask('99/99');
+    $('input#payment_card_birth').mask('99/99/9999');
+    $('input#payment_card_cpf').mask("999.999.999-99");
+    $('input#payment_card_phone').mask("(99) 9999-9999");
   },
+
 
   observeBoletoLink: function() {
     $('input#build_boleto').click(function(e){
@@ -64,13 +107,76 @@ var reviewRequest = {
       }
       MoipWidget(settings);
     });
-    
+
     $('.link_content a').live('click', function(e){
       location.href="/thank_you";
     });
+  },
 
+  observeCreditCardLink: function() {
+    var cardFlagName = ''
+    $('#payment_type_cards_section input[type="text"]').live('focusout', function(e){
+      creditCardInputValidator();
+    });
+
+    $('#payment_type_cards_section input[type="text"]').live('keyup', function(e){
+      $target = $(e.currentTarget);
+      creditCardInputValidator();
+      if($target.attr('id') == 'payment_card_number') {
+        cardFlagName = getCardFlag($target.val());
+        $('input#payment_card_flag').val(cardFlagName)
+      }
+    });
+
+    $('input#credit_card_submit').click(function(e){
+      e.preventDefault();
+      $('.list_payment input').attr('disabled', true);
+      var settings = {
+        "Forma": "CartaoCredito",
+        "Instituicao": cardFlagName,
+        "Parcelas": "1",
+        "Recebimento": "AVista",
+        "CartaoCredito": {
+          "Numero": $('input#payment_card_number').val(),
+          "Expiracao": $('input#payment_card_date').val(),
+          "CodigoSeguranca": $('input#payment_card_source').val(),
+          "Portador": {
+            "Nome": $('input#payment_card_name').val(),
+            "DataNascimento": $('input#payment_card_birth').val(),
+            "Telefone": $('input#payment_card_phone').val(),
+            "Identidade": $('input#payment_card_cpf').val()
+          }
+        }
+      }
+
+      MoipWidget(settings);
+    });
   }
 
+}
+
+var getCardFlag = function(number) {
+  var cc = (number + '').replace(/\s/g, ''); //remove space
+
+  if ((/^(34|37)/).test(cc) && cc.length == 15) {
+      return 'AmericanExpress'; //AMEX begins with 34 or 37, and length is 15.
+  } else if ((/^(51|52|53|54|55)/).test(cc) && cc.length == 16) {
+      return 'MasterCard'; //MasterCard beigins with 51-55, and length is 16.
+  } else if ((/^(4)/).test(cc) && (cc.length == 13 || cc.length == 16)) {
+      return 'Visa'; //VISA begins with 4, and length is 13 or 16.
+  } else if ((/^(300|301|302|303|304|305|36|38)/).test(cc) && cc.length == 14) {
+      return 'Diners'; //Diners Club begins with 300-305 or 36 or 38, and length is 14.
+  } else if ((/^(38)/).test(cc) && cc.length == 19) {
+      return 'Hipercard';
+  }
+  //else if ((/^(6011)/).test(cc) && cc.length == 16) {
+      //return 'Discover'; //Discover begins with 6011, and length is 16.
+  //} else if ((/^(3)/).test(cc) && cc.length == 16) {
+      //return 'JCB';  //JCB begins with 3, and length is 16.
+  //} else if ((/^(2131|1800)/).test(cc) && cc.length == 15) {
+      //return 'JCB';  //JCB begins with 2131 or 1800, and length is 15.
+  //}
+  return false;
 }
 
 var documentValidation = {

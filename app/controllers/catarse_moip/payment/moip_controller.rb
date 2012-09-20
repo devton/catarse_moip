@@ -4,11 +4,13 @@ module CatarseMoip::Payment
     layout :false
 
     def review
+      @moip = ::MoipTransparente::Checkout.new
     end
 
     def get_moip_token
       @backer = current_user.backs.not_confirmed.find params[:id]
 
+      ::MoipTransparente::Config.test = ::Configuration[:moip_test]
       ::MoipTransparente::Config.access_token = ::Configuration[:moip_token]
       ::MoipTransparente::Config.access_key = ::Configuration[:moip_key]
 
