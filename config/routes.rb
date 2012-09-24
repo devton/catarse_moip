@@ -5,6 +5,7 @@ CatarseMoip::Engine.routes.draw do
         post 'notifications' => "history#create"
       end
       member do
+        match :moip_response
         match :review
         match :pay
         match :get_moip_token

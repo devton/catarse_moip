@@ -7,6 +7,25 @@ module CatarseMoip::Payment
       @moip = ::MoipTransparente::Checkout.new
     end
 
+    def moip_response
+      @backer = current_user.backs.find params[:id]
+
+      @backer.payment_notifications.create(extra_data: params[:response])
+
+      unless @backer.confirmed and params[:response]['Status'] == 'Autorizado'
+        @backer.confirm!
+      end
+
+      unless params[:response]['StatusPagamento'] == 'Falha'
+        @backer.update_attributes({
+          payment_id: params[:response]['CodigoMoIP'],
+          payment_service_fee: params[:response]['TaxaMoIP'].to_f
+        })
+      end
+
+      render nothing: true, status: 200
+    end
+
     def get_moip_token
       @backer = current_user.backs.not_confirmed.find params[:id]
 

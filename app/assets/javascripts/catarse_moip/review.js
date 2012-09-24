@@ -1,17 +1,25 @@
 var checkoutFailure = function(data) {
-  console.log('error -> ', data);
+  var backerId = $('input#backer_id').val();
+  $.post('/payment/moip/'+backerId+'/moip_response',{response: data});
 }
 
 var checkoutSuccessful = function(data) {
   console.log('ok ->', data)
-  if(data.StatusPagamento == 'Sucesso') {
+
+  var backerId = $('input#backer_id').val();
+
+  $.post('/payment/moip/'+backerId+'/moip_response',{response: data}, function(){
     if(data.url) {
       var link = $('<a target="__blank">'+data.url+'</a>')
       link.attr('href', data.url);
       $('.link_content').empty().html(link);
       $('.subtitle').fadeIn(300);
     }
-  }
+
+    if($('#payment_type_cards_section').css('display') == 'block') {
+      location.href='/thank_you'
+    }
+  });
 }
 
 var validators = {
