@@ -12,7 +12,7 @@ module CatarseMoip::Payment
 
       @backer.payment_notifications.create(extra_data: params[:response])
 
-      unless @backer.confirmed and params[:response]['Status'] == 'Autorizado'
+      if not @backer.confirmed and params[:response]['Status'] == 'Autorizado'
         @backer.confirm!
       end
 
