@@ -9,6 +9,7 @@ source 'http://gems.github.com'
 
 gem 'rails', '3.2.7'
 gem 'rake', '0.9.2.2'
+
 #gem 'moip-transparente', require: 'moip'
 
 # Database and data related [Putting pg to the end because of a weird bug with Lion, pg and openssl]
