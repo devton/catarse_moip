@@ -6,6 +6,8 @@
 
     .next_step_after_valid_document.hide
 
+
+
       .list_payment
         .input
           = radio_button_tag 'payment_type', "cards"
@@ -19,7 +21,16 @@
 
       #payment_type_cards_section.payment_section
         h3= t('projects.backers.review.form.labels.payment_card')
-  
+        
+        .clearfix
+
+        .bootstrap-twitter style="float: none;"
+          .alert.alert-danger.hide
+            p
+            .clearfix
+
+        .clearfix
+
         .choose_card
           .div
             span= t('projects.backers.review.form.labels.owner_card')
@@ -65,6 +76,16 @@
         .link_content
           .bootstrap-twitter
             = submit_tag t('projects.backers.review.form.labels.build_boleto'), :class => 'btn btn-primary btn-large', :id => "build_boleto"
+
+      #payment_type_account_section.hide.payment_sectio
+        h3= t('projects.backers.review.form.labels.payment_account')
+        p.subtitle= t('projects.backers.review.form.labels.select_account')
+        .clearfix
+        .link_content
+          .bootstrap-twitter
+            = select_tag :account, options_for_select([['Banco do Brasil', 'BancoDoBrasil'], ['Bradesco'], ['Banrisul'], ['Itaú', 'Itau'] ]), :include_blank => true
+            = submit_tag t('projects.backers.review.form.labels.submit'), :class => 'btn btn-primary btn-large', :id => "build_account_link", :disabled => true
+
   
 
 == @moip.javascript_tag

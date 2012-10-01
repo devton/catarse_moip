@@ -4,6 +4,7 @@ pt:
       review:
         form:
           labels:
+            payment_account: 'Debito em Conta'
             document: 'CPF / CNPJ'
             payment_card: 'Pagamento com Cartão'
             owner_card: "Dados do titular do cartão"
@@ -11,6 +12,7 @@ pt:
             payment_boleto: "Pagamento com Boleto"
             payment_boleto_subtitle: "Clique no link abaixo para ver o boleto:"
             select_boleto: "Para prosseguir, por favor selecione:"
+            select_account: "Para prosseguir, por favor selecione o banco:"
             payment_account: "Pagamento com Débito em Conta"
             select_account: "Você será redirecionado para o site do seu banco:"
             you_are_about_html: "Você está prestes a fazer parte do grupo que faz de tudo para o %{link} acontecer."

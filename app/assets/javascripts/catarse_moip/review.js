@@ -1,6 +1,8 @@
 var checkoutFailure = function(data) {
   var backerId = $('input#backer_id').val();
-  $.post('/payment/moip/'+backerId+'/moip_response',{response: data});
+  $.post('/payment/moip/'+backerId+'/moip_response',{response: data[0]});
+  $('.next_step_after_valid_document .alert-danger p').html(data[0].Mensagem);
+  $('.next_step_after_valid_document .alert-danger').fadeIn(300);
 }
 
 var checkoutSuccessful = function(data) {
@@ -54,6 +56,7 @@ var creditCardInputValidator = function() {
 
 }
 
+
 var reviewRequest = {
   getMoipToken: function() {
     $documentField = $('input#user_document');
@@ -94,6 +97,7 @@ var reviewRequest = {
         $('#'+currentElementId+'_section').fadeIn(300);
         reviewRequest.observeBoletoLink();
         reviewRequest.observeCreditCardLink();
+        reviewRequest.observeAccountLink();
       });
     });
 
@@ -118,6 +122,29 @@ var reviewRequest = {
 
     $('.link_content a').live('click', function(e){
       location.href="/thank_you";
+    });
+  },
+
+  observeAccountLink: function() {
+    $('select#account').change(function(event){
+      var target = event.currentTarget;
+      var value = $(target).val();
+      if(value != "" && value != undefined) {
+        $('input#build_account_link').attr('disabled', false);
+      } else {
+        $('input#build_account_link').attr('disabled', true);
+      }
+    });
+
+    $('input#build_account_link').click(function(e){
+      e.preventDefault();
+      $('.list_payment input').attr('disabled', true);
+
+      var settings = {
+        "Instituicao": $('select#account').val(),
+        "Forma": "DebitoBancario"
+      }
+      MoipWidget(settings);
     });
   },
 
