@@ -3,6 +3,7 @@ CatarseMoip::Engine.routes.draw do
     resources :moip, only: [] do
       collection do
         post 'notifications' => "history#create"
+        get 'js'
       end
       member do
         match :moip_response
