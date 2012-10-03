@@ -178,8 +178,6 @@ class MoipTransparente::Checkout
     end    
   end
   
-private
-  
   def get_token_url
     if ::MoipTransparente::Config.test?
       return "https://desenvolvedor.moip.com.br/sandbox/ws/alpha/EnviarInstrucao/Unica"
