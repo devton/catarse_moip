@@ -170,7 +170,9 @@ class MoipTransparente::Checkout
       response = post_data(doc.to_s(:encoding => XML::Encoding::ISO_8859_1))
       parser = XML::Parser.string(response)
       dom = parser.parse 
-    rescue Exception => e
+    rescue LibXML::XML::Error => e
+      puts response.inspect
+      puts parser.inspect
       Rails.logger.info response.inspect
       Rails.logger.info parser.inspect
     end
