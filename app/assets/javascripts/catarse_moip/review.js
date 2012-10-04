@@ -1,14 +1,26 @@
 var checkoutFailure = function(data) {
   var backerId = $('input#backer_id').val();
-  $.post('/payment/moip/'+backerId+'/moip_response',{response: data[0]});
-  $('.next_step_after_valid_document .alert-danger p').html(data[0].Mensagem);
+  var response_data;
+
+  if(data.length > 0) {
+    response_data = data[0]
+  } else {
+    response_data = data
+  }
+
+  $.post('/payment/moip/'+backerId+'/moip_response',{response: response_data});
+  $('.next_step_after_valid_document .alert-danger p').html(response_data.Mensagem);
   $('.next_step_after_valid_document .alert-danger').fadeIn(300);
+  $('.loader').hide();
+  $('.next_step_after_valid_document input[type="submit"]').show();
+  $('.next_step_after_valid_document input[type="submit"]').attr('disabled', false);
 }
 
 var checkoutSuccessful = function(data) {
   console.log('ok ->', data)
 
   var backerId = $('input#backer_id').val();
+  $('.loader').hide();
 
   $.post('/payment/moip/'+backerId+'/moip_response',{response: data}, function(){
     if(data.url) {
@@ -116,6 +128,10 @@ var reviewRequest = {
   observeBoletoLink: function() {
     $('input#build_boleto').click(function(e){
       e.preventDefault();
+
+      $(this).hide();
+      $('.loader').show();
+
       $('.list_payment input').attr('disabled', true);
       var settings = {
         "Forma":"BoletoBancario"
@@ -141,6 +157,10 @@ var reviewRequest = {
 
     $('input#build_account_link').click(function(e){
       e.preventDefault();
+
+      $(this).hide();
+      $('.loader').show();
+
       $('.list_payment input').attr('disabled', true);
 
       var settings = {
@@ -168,7 +188,12 @@ var reviewRequest = {
 
     $('input#credit_card_submit').click(function(e){
       e.preventDefault();
+
       $('.list_payment input').attr('disabled', true);
+
+      $(this).hide();
+      $('.loader').show();
+
       var settings = {
         "Forma": "CartaoCredito",
         "Instituicao": cardFlagName,
