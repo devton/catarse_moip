@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
   s.add_dependency "rails", "~> 3.2.6"
-  s.add_dependency('libxml-ruby', '~> 2.3.3')
+  s.add_dependency('libxml-ruby', '~> 1.1.3')
 
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "factory_girl_rails"
