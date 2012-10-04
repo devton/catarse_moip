@@ -166,9 +166,14 @@ class MoipTransparente::Checkout
     unica << comissoes    
     
     doc.root << unica    
-
-    parser = XML::Parser.string(post_data(doc.to_s(:encoding => XML::Encoding::ISO_8859_1)))
-    dom = parser.parse 
+    begin
+      response = post_data(doc.to_s(:encoding => XML::Encoding::ISO_8859_1))
+      parser = XML::Parser.string(response)
+      dom = parser.parse 
+    rescue Exception => e
+      Rails.logger.info response.inspect
+      Rails.logger.info parser.inspect
+    end
     resposta = dom.find('./Resposta').first
     if resposta.find('Status')[0].content  == 'Sucesso'
       @token = resposta.find('Token')[0].content
