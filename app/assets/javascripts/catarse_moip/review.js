@@ -59,7 +59,8 @@ var creditCardInputValidator = function() {
 
 var reviewRequest = {
   getMoipToken: function() {
-    $documentField = $('input#user_document');
+    var $documentField = $('input#user_document');
+    var loader = $('#loading');
 
     var backerId = $('input#backer_id').val();
     var projectId = $('input#project_id').val();
@@ -76,7 +77,9 @@ var reviewRequest = {
         backer: { payer_document: documentNumber }
       });
 
+      loader.show();
       $.post('/payment/moip/'+backerId+'/get_moip_token', function(response, textStatus){
+        loader.hide();
         $('#catarse_moip_form').prepend(response.widget_tag);
         if(textStatus == 'success') {
           reviewRequest.observePaymentTypeSelection();

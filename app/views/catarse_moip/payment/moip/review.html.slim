@@ -4,9 +4,8 @@
     = label_tag 'user_document', t('projects.backers.review.form.labels.document')
     = text_field_tag 'user_document', nil, { autocomplete: 'off' }
 
+    #loading.hide= image_tag 'loading.gif'
     .next_step_after_valid_document.hide
-
-
 
       .list_payment
         .input
