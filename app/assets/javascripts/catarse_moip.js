@@ -1,5 +1,5 @@
 //= require_tree ./catarse_moip
 
 $(function(){
-  $('input#user_document').keyup(reviewRequest.getMoipToken);
+  var view = window.moipForm = new CATARSE.MoipForm();
 });

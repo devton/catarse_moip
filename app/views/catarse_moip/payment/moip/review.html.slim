@@ -1,11 +1,11 @@
 = javascript_include_tag 'catarse_moip'
 #catarse_moip_form
-  = form_tag 'javascript:void(0);' do
+  = form_tag 'javascript:void(0);', :class => 'moip' do
     = label_tag 'user_document', t('projects.backers.review.form.labels.document')
     = text_field_tag 'user_document', nil, { autocomplete: 'off' }
 
     #loading.hide= image_tag 'loading.gif'
-    .next_step_after_valid_document.hide
+    .next_step_after_valid_document
 
       .list_payment
         .input
