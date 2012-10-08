@@ -84,6 +84,7 @@
         .bootstrap-twitter
           = label_tag 'user_document_account', t('projects.backers.review.form.labels.document')
           = text_field_tag 'user_document_account', nil, { autocomplete: 'off' }
+          = label_tag :account, t('projects.backers.review.form.labels.select_account')
           = select_tag :account, options_for_select([['Banco do Brasil', 'BancoDoBrasil'], ['Bradesco'], ['Banrisul'], ['Itaú', 'Itau'] ]), :include_blank => true
           .loader.hide= image_tag('loading.gif')
           = submit_tag t('projects.backers.review.form.labels.submit'), :class => 'btn btn-primary btn-large', :id => "build_account_link", :disabled => true

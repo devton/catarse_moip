@@ -3,8 +3,9 @@ CATARSE.MoipForm = Backbone.View.extend({
 
   getMoipToken: function(onSuccess){
     var that = this;
+    $('#MoipWidget').remove();
     $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
-      console.log(response.widget_tag);
+      that.paymentChoice.$('input').attr('disabled', 'disabled');
       $('#catarse_moip_form').prepend(response.widget_tag);
       if(_.isFunction(onSuccess)){
         onSuccess(response);
@@ -31,7 +32,7 @@ CATARSE.MoipForm = Backbone.View.extend({
         var link = $('<a target="__blank">'+data.url+'</a>')
         link.attr('href', data.url);
         $('.link_content:visible').empty().html(link);
-        $('.subtitle:visible').fadeIn('fast');
+        $('.payment_section:visible .subtitle').fadeIn('fast');
       }
 
       if($('#payment_type_cards_section').css('display') == 'block') {
