@@ -1,4 +1,4 @@
-CATARSE.PaymentCard = Backbone.View.extend({
+CATARSE.PaymentCard = CATARSE.MoipForm.extend({
   el: '#payment_type_cards_section',
   
   events: {
@@ -7,8 +7,9 @@ CATARSE.PaymentCard = Backbone.View.extend({
     'click input#credit_card_submit' : 'onSubmit'
   },
 
-  initialize: function(){
+  initialize: function(options){
     // Set credit card fields masks
+    this.moipForm = options.moipForm;
     this.$('input#payment_card_date').mask('99/99');
     this.$('input#payment_card_birth').mask('99/99/9999');
     this.$('input#payment_card_cpf').mask("999.999.999-99");
@@ -20,30 +21,34 @@ CATARSE.PaymentCard = Backbone.View.extend({
   },
 
   onSubmit: function(e) {
-    e.preventDefault();
-    $('.list_payment input').attr('disabled', true);
-    $(e.currentTarget).hide();
-    this.$('.loader').show();
+    var that = this;
+    that.moipForm.getMoipToken(function(){
+      e.preventDefault();
+      $('.list_payment input').attr('disabled', true);
+      $(e.currentTarget).hide();
+      that.$('.loader').show();
 
-    var settings = {
-      "Forma": "CartaoCredito",
-      "Instituicao": this.$('input#payment_card_flag').val(),
-      "Parcelas": "1",
-      "Recebimento": "AVista",
-      "CartaoCredito": {
-        "Numero": this.$('input#payment_card_number').val(),
-        "Expiracao": this.$('input#payment_card_date').val(),
-        "CodigoSeguranca": this.$('input#payment_card_source').val(),
-        "Portador": {
-          "Nome": this.$('input#payment_card_name').val(),
-          "DataNascimento": this.$('input#payment_card_birth').val(),
-          "Telefone": this.$('input#payment_card_phone').val(),
-          "Identidade": this.$('input#payment_card_cpf').val()
+      var settings = {
+        "Forma": "CartaoCredito",
+        "Instituicao": that.$('input#payment_card_flag').val(),
+        "Parcelas": "1",
+        "Recebimento": "AVista",
+        "CartaoCredito": {
+          "Numero": that.$('input#payment_card_number').val(),
+          "Expiracao": that.$('input#payment_card_date').val(),
+          "CodigoSeguranca": that.$('input#payment_card_source').val(),
+          "Portador": {
+            "Nome": that.$('input#payment_card_name').val(),
+            "DataNascimento": that.$('input#payment_card_birth').val(),
+            "Telefone": that.$('input#payment_card_phone').val(),
+            "Identidade": that.$('input#payment_card_cpf').val()
+          }
         }
-      }
-    };
+      };
 
-    MoipWidget(settings);
+      MoipWidget(settings);
+
+    });
   },
 
   hasContent: function(element) {

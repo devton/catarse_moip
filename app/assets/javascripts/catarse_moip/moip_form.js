@@ -7,7 +7,6 @@ CATARSE.MoipForm = Backbone.View.extend({
 
   onUserDocumentKeyup: function(){
     var $documentField = $('input#user_document');
-    var loader = $('#loading');
     var projectId = $('input#project_id').val();
 
     var documentNumber = $documentField.val();
@@ -15,6 +14,7 @@ CATARSE.MoipForm = Backbone.View.extend({
     var resultCnpj = this.validateCnpj(documentNumber);
 
     if(resultCpf || resultCnpj) {
+      this.$('input#payment_card_cpf').val($documentField.val());
       $documentField.addClass('ok').removeClass('error');
       $documentField.attr('disabled', true);
 
@@ -22,20 +22,20 @@ CATARSE.MoipForm = Backbone.View.extend({
         backer: { payer_document: documentNumber }
       });
 
-      loader.show();
-      this.getMoipToken().success(function(response, textStatus){
-        loader.hide();
-        console.log(response.widget_tag);
-        $('#catarse_moip_form').prepend(response.widget_tag);
-      });
-
     } else {
       $documentField.addClass('error').removeClass('ok');
     }
   },
 
-  getMoipToken: function(){
-    return $.post('/payment/moip/' + this.backerId + '/get_moip_token')
+  getMoipToken: function(onSuccess){
+    var that = this;
+    $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
+      console.log(response.widget_tag);
+      $('#catarse_moip_form').prepend(response.widget_tag);
+      if(_.isFunction(onSuccess)){
+        onSuccess(response);
+      }
+    });
   },
 
   checkoutFailure: function(data) {
@@ -141,11 +141,11 @@ CATARSE.MoipForm = Backbone.View.extend({
     this.loader = this.$('.loader');
 
     this.paymentChoice = new CATARSE.PaymentChoice();
-    this.paymentCard = new CATARSE.PaymentCard();
-    this.paymentSlip = new CATARSE.PaymentSlip();
-    this.paymentAccount = new CATARSE.PaymentAccount();
-
-
+    this.paymentCard = new CATARSE.PaymentCard({moipForm: this});
+    this.paymentSlip = new CATARSE.PaymentSlip({moipForm: this});
+    this.paymentAccount = new CATARSE.PaymentAccount({moipForm: this});
+    window.checkoutSuccessful = _.bind(this.checkoutSuccessful, this);
+    window.checkoutFailure = _.bind(this.checkoutFailure, this);
     console.log('ok');
   }
 });

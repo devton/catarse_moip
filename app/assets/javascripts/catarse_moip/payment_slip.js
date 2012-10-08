@@ -6,16 +6,23 @@ CATARSE.PaymentSlip = Backbone.View.extend({
     'click .link_content a' : 'onContentClick'
   },
 
-  onBuildBoletoClick: function(e){
-    e.preventDefault();
-    $(e.currentTarget).hide();
-    this.loader.show();
+  initialize: function(options){
+    this.moipForm = options.moipForm;
+  },
 
-    $('.list_payment input').attr('disabled', true);
-    var settings = {
-      "Forma":"BoletoBancario"
-    }
-    MoipWidget(settings);
+  onBuildBoletoClick: function(e){
+    var that = this;
+    that.moipForm.getMoipToken(function(){
+      e.preventDefault();
+      $(e.currentTarget).hide();
+      that.moipForm.loader.show();
+
+      $('.list_payment input').attr('disabled', true);
+      var settings = {
+        "Forma":"BoletoBancario"
+      }
+      MoipWidget(settings);
+    });
   },
 
   onContentClick: function(e){
