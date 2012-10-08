@@ -23,12 +23,12 @@ CATARSE.PaymentCard = CATARSE.UserDocument.extend({
 
   onSubmit: function(e) {
     var that = this;
-    that.moipForm.getMoipToken(function(){
-      e.preventDefault();
-      $('.list_payment input').attr('disabled', true);
-      $(e.currentTarget).hide();
-      that.$('.loader').show();
+    e.preventDefault();
+    $(e.currentTarget).hide();
+    that.moipForm.loader.show();
 
+    // Get token and send payment
+    that.moipForm.getMoipToken(function(){
       var settings = {
         "Forma": "CartaoCredito",
         "Instituicao": that.$('input#payment_card_flag').val(),
@@ -46,9 +46,7 @@ CATARSE.PaymentCard = CATARSE.UserDocument.extend({
           }
         }
       };
-
       MoipWidget(settings);
-
     });
   },
 

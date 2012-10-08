@@ -13,10 +13,10 @@ CATARSE.MoipForm = Backbone.View.extend({
   },
 
   checkoutFailure: function(data) {
+    this.loader.hide();
     var response_data = (data.length > 0 ? data[0] : data);
     this.message.find('p').html(response_data.Mensagem);
     this.message.fadeIn('fast');
-    this.loader.hide();
   },
 
   updateMoipResponse: function(data){
@@ -24,13 +24,14 @@ CATARSE.MoipForm = Backbone.View.extend({
   },
 
   checkoutSuccessful: function(data) {
-    this.loader.hide();
+    var that = this;
     $.post('/payment/moip/' + this.backerId + '/moip_response', {response: data}).success(function(){
+      that.loader.hide();
       if(data.url) {
         var link = $('<a target="__blank">'+data.url+'</a>')
         link.attr('href', data.url);
-        $('.link_content').empty().html(link);
-        $('.subtitle').fadeIn('fast');
+        $('.link_content:visible').empty().html(link);
+        $('.subtitle:visible').fadeIn('fast');
       }
 
       if($('#payment_type_cards_section').css('display') == 'block') {

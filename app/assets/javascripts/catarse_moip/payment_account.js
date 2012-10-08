@@ -19,14 +19,12 @@ CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
 
   onBuildAccountClick: function(e) {
     var that = this;
+    e.preventDefault();
+    $(e.currentTarget).hide();
+    that.moipForm.loader.show();
+
+    // Get token and send payment
     that.moipForm.getMoipToken(function(){
-      e.preventDefault();
-
-      $(e.currentTarget).hide();
-      $(e.currentTarget).show();
-
-      $('.list_payment input').attr('disabled', true);
-
       var settings = {
         "Instituicao": $('select#account').val(),
         "Forma": "DebitoBancario"

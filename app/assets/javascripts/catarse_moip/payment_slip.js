@@ -14,12 +14,12 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
 
   onBuildBoletoClick: function(e){
     var that = this;
-    that.moipForm.getMoipToken(function(){
-      e.preventDefault();
-      $(e.currentTarget).hide();
-      that.moipForm.loader.show();
+    e.preventDefault();
+    $(e.currentTarget).hide();
+    that.moipForm.loader.show();
 
-      $('.list_payment input').attr('disabled', true);
+    // Get token and send payment
+    that.moipForm.getMoipToken(function(){
       var settings = {
         "Forma":"BoletoBancario"
       }
