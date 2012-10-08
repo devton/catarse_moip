@@ -1,10 +1,7 @@
 = javascript_include_tag 'catarse_moip'
 #catarse_moip_form
   = form_tag 'javascript:void(0);', :class => 'moip' do
-    = label_tag 'user_document', t('projects.backers.review.form.labels.document')
-    = text_field_tag 'user_document', nil, { autocomplete: 'off' }
 
-    #loading.hide= image_tag 'loading.gif'
     .next_step_after_valid_document
 
       .list_payment
@@ -75,6 +72,8 @@
         .clearfix
         .link_content
           .bootstrap-twitter
+            = label_tag 'user_document_payment_slip', t('projects.backers.review.form.labels.document')
+            = text_field_tag 'user_document_payment_slip', nil, { autocomplete: 'off' }
             .loader.hide= image_tag('loading.gif')
             = submit_tag t('projects.backers.review.form.labels.build_boleto'), :class => 'btn btn-primary btn-large', :id => "build_boleto"
 
@@ -84,6 +83,8 @@
         .clearfix
         .link_content
           .bootstrap-twitter
+            = label_tag 'user_document_account', t('projects.backers.review.form.labels.document')
+            = text_field_tag 'user_document_account', nil, { autocomplete: 'off' }
             = select_tag :account, options_for_select([['Banco do Brasil', 'BancoDoBrasil'], ['Bradesco'], ['Banrisul'], ['Itaú', 'Itau'] ]), :include_blank => true
             .loader.hide= image_tag('loading.gif')
             = submit_tag t('projects.backers.review.form.labels.submit'), :class => 'btn btn-primary btn-large', :id => "build_account_link", :disabled => true

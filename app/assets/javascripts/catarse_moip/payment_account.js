@@ -1,13 +1,15 @@
-CATARSE.PaymentAccount = Backbone.View.extend({
+CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
   el: '#payment_type_account_section',
 
   events: {
     'change select#account' : 'onChangeAccount',
-    'click input#build_account_link' : 'onBuildAccountClick'
+    'click input#build_account_link' : 'onBuildAccountClick',
+    'keyup #user_document_account' : 'onUserDocumentKeyup'
   },
 
   initialize: function(options){
     this.moipForm = options.moipForm;
+    this.$('input#user_document_account').mask("999.999.999-99");
   },
 
   onChangeAccount: function(e){

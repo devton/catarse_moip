@@ -1,10 +1,11 @@
-CATARSE.PaymentCard = CATARSE.MoipForm.extend({
+CATARSE.PaymentCard = CATARSE.UserDocument.extend({
   el: '#payment_type_cards_section',
   
   events: {
     'keyup input[type="text"]' : 'creditCardInputValidator',
     'keyup #payment_card_number' : 'onKeyupPaymentCardNumber',
-    'click input#credit_card_submit' : 'onSubmit'
+    'click input#credit_card_submit' : 'onSubmit',
+    'keyup #payment_card_cpf' : 'onUserDocumentKeyup'
   },
 
   initialize: function(options){
