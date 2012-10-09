@@ -3,14 +3,20 @@ CATARSE.MoipForm = Backbone.View.extend({
 
   getMoipToken: function(onSuccess){
     var that = this;
-    $('#MoipWidget').remove();
-    $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
-      that.paymentChoice.$('input').attr('disabled', 'disabled');
-      $('#catarse_moip_form').prepend(response.widget_tag);
+    //$('#MoipWidget').remove();
+    if($('#MoipWidget').length > 0) {
       if(_.isFunction(onSuccess)){
-        onSuccess(response);
+        onSuccess();
       }
-    });
+    } else {
+      $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
+        that.paymentChoice.$('input').attr('disabled', 'disabled');
+        $('#catarse_moip_form').prepend(response.widget_tag);
+        if(_.isFunction(onSuccess)){
+          onSuccess(response);
+        }
+      });
+    }
   },
 
   checkoutFailure: function(data) {
@@ -18,6 +24,7 @@ CATARSE.MoipForm = Backbone.View.extend({
     var response_data = (data.length > 0 ? data[0] : data);
     this.message.find('p').html(response_data.Mensagem);
     this.message.fadeIn('fast');
+    $('input[type="submit"]').removeAttr('disabled').show();
   },
 
   updateMoipResponse: function(data){

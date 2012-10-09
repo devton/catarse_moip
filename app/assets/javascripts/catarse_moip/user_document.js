@@ -5,23 +5,24 @@ CATARSE.UserDocument = Backbone.View.extend({
     var documentNumber = $documentField.val();
     var resultCpf = this.validateCpf(documentNumber);
     var resultCnpj = this.validateCnpj(documentNumber);
+    if(documentNumber.replace(/[.\-\_ ]/g, '').length > 10) {
+      if(resultCpf || resultCnpj) {
+        $documentField.addClass('ok').removeClass('error');
+        //$documentField.attr('disabled', true);
 
-    if(resultCpf || resultCnpj) {
-      $documentField.addClass('ok').removeClass('error');
-      $documentField.attr('disabled', true);
+        $.post('/projects/' + this.moipForm.projectId + '/backers/' + this.moipForm.backerId + '/update_info', {
+          backer: { payer_document: documentNumber }
+        });
 
-      $.post('/projects/' + this.moipForm.projectId + '/backers/' + this.moipForm.backerId + '/update_info', {
-        backer: { payer_document: documentNumber }
-      });
-
-    } else {
-      $documentField.addClass('error').removeClass('ok');
+      } else {
+        $documentField.addClass('error').removeClass('ok');
+      }
     }
   },
 
   validateCpf: function(cpfString){
     var product = 0, i, digit;
-    cpfString = cpfString.replace(/[.\- ]/g, '');
+    cpfString = cpfString.replace(/[.\-\_ ]/g, '');
     var aux = Math.floor(parseFloat(cpfString) / 100);
     var cpf = aux * 100;
     var quotient;
