@@ -70,6 +70,10 @@
       #payment_type_boleto_section.hide.payment_section
         h3= t('projects.backers.review.form.labels.payment_boleto')
         .clearfix
+        .bootstrap-twitter style="float: none;"
+          .alert.alert-danger.hide
+            p.error_msg
+            .clearfix
         .bootstrap-twitter
           = label_tag 'user_document_payment_slip', t('projects.backers.review.form.labels.document')
           = text_field_tag 'user_document_payment_slip', nil, { autocomplete: 'off' }
@@ -81,6 +85,11 @@
 
       #payment_type_account_section.hide.payment_section
         h3= t('projects.backers.review.form.labels.payment_account')
+        .clearfix
+        .bootstrap-twitter style="float: none;"
+          .alert.alert-danger.hide
+            p.error_msg
+            .clearfix
         .bootstrap-twitter
           = label_tag 'user_document_account', t('projects.backers.review.form.labels.document')
           = text_field_tag 'user_document_account', nil, { autocomplete: 'off' }
