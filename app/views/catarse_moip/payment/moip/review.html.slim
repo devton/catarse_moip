@@ -74,7 +74,7 @@
           = label_tag 'user_document_payment_slip', t('projects.backers.review.form.labels.document')
           = text_field_tag 'user_document_payment_slip', nil, { autocomplete: 'off' }
           .loader.hide= image_tag('loading.gif')
-          = submit_tag t('projects.backers.review.form.labels.build_boleto'), :class => 'btn btn-primary btn-large', :id => "build_boleto"
+          = submit_tag t('projects.backers.review.form.labels.build_boleto'), :class => 'btn btn-primary btn-large', :id => "build_boleto", :disabled => true
         .clearfix
         p.subtitle.hide= t('projects.backers.review.form.labels.payment_boleto_subtitle')
         .link_content
