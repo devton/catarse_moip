@@ -11,7 +11,7 @@ describe CatarseMoip::Payment::NotificationsController do
         post :create, {:id_transacao => "non-existant backer key", :use_route => 'catarse_moip'}
       end
 
-      its(:body){ should == "#<ActiveRecord::RecordNotFound: Couldn't find Backer with key = non-existant backer key>: Couldn't find Backer with key = non-existant backer key" }
+      its(:body){ should == "#<ActiveRecord::RecordNotFound: Couldn't find Backer with key = non-existant backer key>: Couldn't find Backer with key = non-existant backer key recebemos: {\"id_transacao\"=>\"non-existant backer key\", \"controller\"=>\"catarse_moip/payment/notifications\", \"action\"=>\"create\"}" }
       its(:status){ should == 422 }
     end
 
