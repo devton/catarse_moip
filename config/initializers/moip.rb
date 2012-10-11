@@ -1,4 +1,4 @@
-::MoIP::Config.setup do |config|
+::MoIP.setup do |config|
   if ::Configuration[:moip_uri]
     config.uri = ::Configuration[:moip_uri]
   end
