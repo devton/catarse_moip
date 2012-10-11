@@ -8,7 +8,7 @@ module CatarseMoip::Payment
       @processor.process!(params)
       return render :nothing => true, :status => 200
     rescue Exception => e
-      return render :text => "#{e.inspect}: #{e.message}", :status => 422
+      return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
     end
 
   end
