@@ -49,6 +49,7 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Project.any_instance.stub(:store_image_url).and_return('http://www.store_image_url.com')
+    Notification.stub(:create_notification)
   end
 end
 
