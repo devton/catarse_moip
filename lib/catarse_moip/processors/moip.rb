@@ -32,7 +32,7 @@ module CatarseMoip
       end
 
       def update_backer
-        response = MoIP::Client.query(@backer.payment_token)
+        response = ::MoIP::Client.query(@backer.payment_token)
         @backer.update_attributes({
           :payment_id => response["Autorizacao"]["Pagamento"]["CodigoMoIP"],
           :payment_choice => response["Autorizacao"]["Pagamento"]["FormaPagamento"],
