@@ -103,21 +103,3 @@
   
 
 == javascript_include_tag js_payment_moip_index_path
-
-  
-  /h3= t('.payment_card')
-
-  /h3= t('.payment_boleto')
-  /p= t('.select_boleto')
-  /= form.inputs do             
-    /= form.input :cpf, :as => :string, :input_html => {:autocomplete => 'off'}            
-  /.bootstrap-twitter
-    /= form.submit t('.submit'), :disabled => true, :class => 'btn btn-primary btn-large', :id => "backer_submit"
-  
-  
-  /h3= t('.payment_account')
-  /p= t('.select_account')
-  /.bootstrap-twitter
-    /= form.submit t('.submit'), :disabled => true, :class => 'btn btn-primary btn-large', :id => "backer_submit"
-  
-  
