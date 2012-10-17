@@ -61,7 +61,6 @@ CATARSE.MoipForm = Backbone.View.extend({
     this.paymentAccount = new CATARSE.PaymentAccount({moipForm: this});
     window.checkoutSuccessful = _.bind(this.checkoutSuccessful, this);
     window.checkoutFailure = _.bind(this.checkoutFailure, this);
-    console.log('ok');
   }
 });
 
