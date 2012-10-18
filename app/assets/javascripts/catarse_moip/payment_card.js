@@ -14,7 +14,7 @@ CATARSE.PaymentCard = CATARSE.UserDocument.extend({
     this.$('input#payment_card_date').mask('99/99');
     this.$('input#payment_card_birth').mask('99/99/9999');
     this.$('input#payment_card_cpf').mask("999.999.999-99");
-    this.$('input#payment_card_phone').mask("(99) 9999-9999");
+    this.$('input#payment_card_phone').mask("(99) 9999-9999?9");
   },
 
   onKeyupPaymentCardNumber: function(e){
