@@ -22,6 +22,9 @@ CATARSE.MoipForm = Backbone.View.extend({
   checkoutFailure: function(data) {
     this.loader.hide();
     var response_data = (data.length > 0 ? data[0] : data);
+    if(response_data.Codigo == 914){
+      response_data.Mensagem += '. Tente <a href="javascript:window.location.reload();">recarregar a página</a> e repetir a operação de pagamento.';
+    }
     this.message.find('p').html(response_data.Mensagem);
     this.message.fadeIn('fast');
     $('input[type="submit"]').removeAttr('disabled').show();
