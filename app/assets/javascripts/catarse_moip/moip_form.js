@@ -11,9 +11,14 @@ CATARSE.MoipForm = Backbone.View.extend({
     } else {
       $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
         that.paymentChoice.$('input').attr('disabled', 'disabled');
-        $('#catarse_moip_form').prepend(response.widget_tag);
-        if(_.isFunction(onSuccess)){
-          onSuccess(response);
+        if(response.get_token_response.status == 'fail'){
+          that.checkoutFailure({Code: 0, Mensagem: response.get_token_response.message});
+        }
+        else{
+          $('#catarse_moip_form').prepend(response.widget_tag);
+          if(_.isFunction(onSuccess)){
+            onSuccess(response);
+          }
         }
       });
     }
