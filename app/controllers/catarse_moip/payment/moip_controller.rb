@@ -68,7 +68,7 @@ module CatarseMoip::Payment
         @backer.update_column :payment_token, response[:token]
       end
 
-      render json: { moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
+      render json: { get_token_response: response, moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
   end
 end
