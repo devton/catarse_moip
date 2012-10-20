@@ -41,7 +41,7 @@ CATARSE.MoipForm = Backbone.View.extend({
       that.loader.hide();
       // Bail out when get an error from MoIP
       if(data.Status == 'Cancelado'){
-        return that.checkoutFailure({Codigo: 0, Mensagem: data.Classificacao.Descricao + '. Verifique os dados de pagamento e tente novamente.'})
+        return that.checkoutFailure({Codigo: 0, Mensagem: data.Classificacao.Descricao + '. Verifique os dados de pagamento <a href="javascript:window.location.reload();">recarregue a página</a> e tente novamente.'})
       }
 
       // Go on otherwise
