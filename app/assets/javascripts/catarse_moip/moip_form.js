@@ -35,14 +35,16 @@ CATARSE.MoipForm = Backbone.View.extend({
     $('input[type="submit"]').removeAttr('disabled').show();
   },
 
-  updateMoipResponse: function(data){
-    return $.post('/payment/moip/' + this.backerId + '/moip_response', {response: data});
-  },
-
   checkoutSuccessful: function(data) {
     var that = this;
     $.post('/payment/moip/' + this.backerId + '/moip_response', {response: data}).success(function(){
       that.loader.hide();
+      // Bail out when get an error from MoIP
+      if(data.Status == 'Cancelado'){
+        return that.checkoutFailure({Codigo: 0, Mensagem: data.Classificacao.Descricao + '. Verifique os dados de pagamento e tente novamente.'})
+      }
+
+      // Go on otherwise
       if(data.url) {
         var link = $('<a target="__blank">'+data.url+'</a>')
         link.attr('href', data.url);
