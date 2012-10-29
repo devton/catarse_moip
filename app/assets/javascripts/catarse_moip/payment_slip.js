@@ -34,7 +34,9 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
   },
 
   onContentClick: function(e){
-    location.href="/thank_you";
+    window.setTimeout(function(){
+      location.href="/thank_you";
+    }, 1000);
   }
 });
 
