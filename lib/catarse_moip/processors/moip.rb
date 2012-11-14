@@ -43,7 +43,7 @@ module CatarseMoip
 
       def process!(params)
         update_backer if @backer.payment_id.nil?
-        @backer.payment_notifications.create! extra_data: params
+        @backer.payment_notifications.create! extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
         case params[:status_pagamento].to_i
         when TransactionStatus::AUTHORIZED
           @backer.confirm! unless @backer.confirmed
