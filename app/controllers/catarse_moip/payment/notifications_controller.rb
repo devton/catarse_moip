@@ -2,6 +2,7 @@ require 'catarse_moip/processors/moip'
 
 module CatarseMoip::Payment
   class NotificationsController < ApplicationController
+    skip_before_filter :force_http
     def create
      @backer = Backer.find_by_key! params[:id_transacao]
       @processor = CatarseMoip::Processors::Moip.new @backer

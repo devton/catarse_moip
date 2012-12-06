@@ -1,6 +1,7 @@
 require 'moip_transparente'
 module CatarseMoip::Payment
   class MoipController < ApplicationController
+    skip_before_filter :force_http
     layout :false
 
     def js
