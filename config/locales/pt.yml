@@ -2,6 +2,7 @@ pt:
   projects:
     backers:
       review:
+        moip: 'Pagamento nacional'
         form:
           labels:
             payment_account: 'Debito em Conta'
