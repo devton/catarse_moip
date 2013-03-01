@@ -6,7 +6,7 @@ pt:
         form:
           labels:
             payment_account: 'Debito em Conta'
-            document: 'CPF (somente números)'
+            document: 'CPF/CNPJ (somente números)'
             payment_card: 'Pagamento com Cartão'
             owner_card: "Dados do titular do cartão"
             number_card: "Dados do cartão"
