@@ -3,14 +3,15 @@ CATARSE.UserDocument = Backbone.View.extend({
     var $documentField = $(e.currentTarget);
 
     var documentNumber = $documentField.val();
+    $documentField.prop('maxlength', 18);
     var resultCpf = this.validateCpf(documentNumber);
     var resultCnpj = this.validateCnpj(documentNumber.replace(/[\/.\-\_ ]/g, ''));
     var numberLength = documentNumber.replace(/[.\-\_ ]/g, '').length
     if(numberLength > 10) {
      if($documentField.attr('id') != 'payment_card_cpf'){
-         if(numberLength == 11) { $documentField.mask("999.999.999-99"); }//CPF
-         else if(numberLength >= 14 ){ $documentField.mask("99.999.999/9999-99");}//CNPJ
-         if(numberLength <= 14){ $documentField.unmask()}
+         if(numberLength == 11) {$documentField.mask('999.999.999-99?999'); }//CPF
+         else if(numberLength == 14 ){$documentField.mask('99.999.999/9999-99');}//CNPJ
+         if(numberLength != 14 || numberLength != 11){ $documentField.unmask()}
         }
 
      if(resultCpf || resultCnpj) {

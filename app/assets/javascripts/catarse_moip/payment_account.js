@@ -9,6 +9,7 @@ CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
 
   initialize: function(options){
     this.moipForm = options.moipForm;
+    this.$('input#user_document_account').mask("999.999.999-99");
   },
 
   onChangeAccount: function(e){

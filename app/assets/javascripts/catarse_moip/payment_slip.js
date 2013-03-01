@@ -15,6 +15,7 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
 
   initialize: function(options){
     this.moipForm = options.moipForm;
+    this.$('input#user_document_payment_slip').mask("999.999.999-99");
   },
 
   onBuildBoletoClick: function(e){
