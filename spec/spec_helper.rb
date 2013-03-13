@@ -41,7 +41,7 @@ RSpec.configure do |config|
 
   config.include Devise::TestHelpers, :type => :controller
 
-  config.include Factory::Syntax::Methods
+  config.include FactoryGirl::Syntax::Methods
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with :truncation

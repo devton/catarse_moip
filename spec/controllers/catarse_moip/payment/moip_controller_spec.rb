@@ -7,7 +7,7 @@ describe CatarseMoip::Payment::MoipController do
     let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
 
     before do
-      @backer = Factory(:backer, :confirmed => false)
+      @backer = FactoryGirl.create(:backer, :confirmed => false)
       controller.stub(:current_user).and_return(@backer.user)
       ::MoipTransparente::Checkout.any_instance.stub(:get_token).and_return(get_token_response)
       ::MoipTransparente::Checkout.any_instance.stub(:moip_widget_tag).and_return('<div>')
