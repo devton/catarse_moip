@@ -52,7 +52,7 @@ describe CatarseMoip::Processors::Moip do
 
       before do
         backer.update_attributes :payment_id => nil
-        MoIP::Client.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         processor.update_backer
       end
 
@@ -64,7 +64,7 @@ describe CatarseMoip::Processors::Moip do
     context "with a fake data set that works for some cases" do
       before do
         backer.update_attributes :payment_id => nil
-        MoIP::Client.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         processor.update_backer
       end
 
