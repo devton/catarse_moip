@@ -34,8 +34,8 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
   },
 
   onContentClick: function(e){
+    this.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
     window.setTimeout(function(){
-      location.href="/thank_you";
       var thank_you = $('#project_review').data('thank-you-path');
       if(thank_you){
         location.href = thank_you;

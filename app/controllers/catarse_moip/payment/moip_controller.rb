@@ -1,4 +1,6 @@
 require 'moip_transparente'
+require 'catarse_moip/processors/moip'
+
 module CatarseMoip::Payment
   class MoipController < ApplicationController
     skip_before_filter :force_http
