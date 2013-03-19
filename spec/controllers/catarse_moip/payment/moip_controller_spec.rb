@@ -3,16 +3,31 @@ require 'spec_helper'
 
 describe CatarseMoip::Payment::MoipController do
   subject{ response }
-  describe "POST get_moip_token" do
-    let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
 
+  let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
+
+  before do
+    @backer = FactoryGirl.create(:backer, :confirmed => false)
+    controller.stub(:current_user).and_return(@backer.user)
+    ::MoipTransparente::Checkout.any_instance.stub(:get_token).and_return(get_token_response)
+    ::MoipTransparente::Checkout.any_instance.stub(:moip_widget_tag).and_return('<div>')
+    ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')
+    ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
+  end
+
+  describe "POST moip_response" do
+    let(:processor){ double('moip processor') }
     before do
-      @backer = FactoryGirl.create(:backer, :confirmed => false)
-      controller.stub(:current_user).and_return(@backer.user)
-      ::MoipTransparente::Checkout.any_instance.stub(:get_token).and_return(get_token_response)
-      ::MoipTransparente::Checkout.any_instance.stub(:moip_widget_tag).and_return('<div>')
-      ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')
-      ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
+      CatarseMoip::Processors::Moip.should_receive(:new).with(@backer).and_return(processor)
+      processor.should_receive(:process!)
+      post :moip_response, id: @backer.id, response: {StatusPagamento: 'Sucesso'}, use_route: 'catarse_moip'
+    end
+
+    its(:status){ should == 200 }
+  end
+
+  describe "POST get_moip_token" do
+    before do
       post :get_moip_token, :id => @backer.id, :use_route => 'catarse_moip'
     end
 

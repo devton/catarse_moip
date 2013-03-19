@@ -18,15 +18,9 @@ module CatarseMoip::Payment
 
       @backer.payment_notifications.create(extra_data: params[:response])
 
-      if not @backer.confirmed and params[:response]['Status'] == 'Autorizado'
-        @backer.confirm!
-      end
-
       unless params[:response]['StatusPagamento'] == 'Falha'
-        @backer.update_attributes({
-          payment_id: params[:response]['CodigoMoIP'],
-          payment_service_fee: params[:response]['TaxaMoIP'].to_f
-        })
+        @processor = CatarseMoip::Processors::Moip.new @backer
+        @processor.process!(params)
       end
 
       render nothing: true, status: 200
