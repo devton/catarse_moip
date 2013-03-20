@@ -4,7 +4,8 @@ CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
   events: {
     'change select#account' : 'onChangeAccount',
     'click input#build_account_link' : 'onBuildAccountClick',
-    'keyup #user_document_account' : 'onUserDocumentKeyup'
+    'keyup #user_document_account' : 'onUserDocumentKeyup',
+    'click .link_content a' : 'onContentClick',
   },
 
   initialize: function(options){

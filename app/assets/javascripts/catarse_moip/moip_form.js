@@ -51,9 +51,8 @@ CATARSE.MoipForm = Backbone.View.extend({
         $('.link_content:visible').empty().html(link);
         $('.payment_section:visible .subtitle').fadeIn('fast');
       }
-
-      var thank_you = $('#project_review').data('thank-you-path');
-      if($('#payment_type_cards_section').css('display') == 'block') {
+      else {
+        var thank_you = $('#project_review').data('thank-you-path');
         if(thank_you){
           location.href = thank_you;
         }

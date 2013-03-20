@@ -45,32 +45,31 @@ describe CatarseMoip::Processors::Moip do
   let(:processor){ CatarseMoip::Processors::Moip.new backer }
 
   describe "#update_backer" do
+    before do
+      backer.update_attributes :payment_id => nil
+      MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+      processor.update_backer
+    end
+
+    context "with no response from moip" do
+      let(:moip_query_response) { nil }
+      it("should not assign payment_id"){ backer.payment_id.should be_nil }
+    end
+
+    context "with an incomplete transaction" do
+      let(:moip_query_response) do
+        {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso"}
+      end
+      it("should not assign payment_id"){ backer.payment_id.should be_nil }
+    end
+
     context "with a real data set that works for some cases" do
       let(:moip_query_response) do
         {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso", "Autorizacao"=>{"Pagador"=>{"Nome"=>"juliana.giopato@hotmail.com", "Email"=>"juliana.giopato@hotmail.com"}, "EnderecoCobranca"=>{"Logradouro"=>"Rua sócrates abraão ", "Numero"=>"16.0", "Complemento"=>"casa 19", "Bairro"=>"Campo Limpo", "CEP"=>"05782-470", "Cidade"=>"São Paulo", "Estado"=>"SP", "Pais"=>"BRA", "TelefoneFixo"=>"1184719963"}, "Recebedor"=>{"Nome"=>"Catarse", "Email"=>"financeiro@catarse.me"}, "Pagamento"=>[{"Data"=>"2012-10-17T13:06:07.000-03:00", "DataCredito"=>"2012-10-19T00:00:00.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"1.34", "ValorLiquido"=>"48.66", "FormaPagamento"=>"BoletoBancario", "InstituicaoPagamento"=>"Bradesco", "Status"=>"Autorizado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5258"}, {"Data"=>"2012-10-17T13:05:49.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"3.09", "ValorLiquido"=>"46.91", "FormaPagamento"=>"CartaoDebito", "InstituicaoPagamento"=>"Visa", "Status"=>"Iniciado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5248"}]}}
       end
-
-      before do
-        backer.update_attributes :payment_id => nil
-        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
-        processor.update_backer
-      end
-
       it("should assign payment_id"){ backer.payment_id.should == moip_query_response["Autorizacao"]["Pagamento"][0]["CodigoMoIP"] }
       it("should assign payment_choice"){ backer.payment_choice.should == moip_query_response["Autorizacao"]["Pagamento"][0]["FormaPagamento"] }
       it("should assign payment_service_fee"){ backer.payment_service_fee.to_s.should == moip_query_response["Autorizacao"]["Pagamento"][0]["TaxaMoIP"] }
-    end
-
-    context "with a fake data set that works for some cases" do
-      before do
-        backer.update_attributes :payment_id => nil
-        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
-        processor.update_backer
-      end
-
-      it("should assign payment_id"){ backer.payment_id.should == moip_query_response["Autorizacao"]["Pagamento"]["CodigoMoIP"] }
-      it("should assign payment_choice"){ backer.payment_choice.should == moip_query_response["Autorizacao"]["Pagamento"]["FormaPagamento"] }
-      it("should assign payment_service_fee"){ backer.payment_service_fee.to_s.should == moip_query_response["Autorizacao"]["Pagamento"]["TaxaMoIP"] }
     end
   end
 

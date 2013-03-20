@@ -31,19 +31,6 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
       }
       MoipWidget(settings);
     });
-  },
-
-  onContentClick: function(e){
-    this.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
-    window.setTimeout(function(){
-      var thank_you = $('#project_review').data('thank-you-path');
-      if(thank_you){
-        location.href = thank_you;
-      }
-      else {
-        location.href = '/';
-      }
-    }, 1000);
   }
 });
 
