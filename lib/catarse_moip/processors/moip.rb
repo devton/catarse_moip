@@ -32,7 +32,9 @@ module CatarseMoip
       end
 
       def update_backer
-        pagamento = ::MoIP.query(@backer.payment_token)["Autorizacao"]["Pagamento"]
+        response = ::MoIP.query(@backer.payment_token)
+        raise "#{@backer.payment_token} => #{response.inspect}"
+        pagamento = response["Autorizacao"]["Pagamento"]
         pagamento = pagamento.first unless pagamento.respond_to?(:key)
         @backer.update_attributes({
           :payment_id => pagamento["CodigoMoIP"],
