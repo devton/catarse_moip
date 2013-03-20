@@ -3,7 +3,7 @@ CATARSE.UserDocument = Backbone.View.extend({
   onContentClick: function(e){
     window.setTimeout(function(){
       this.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
-    }, 1000);
+    }, 2000);
   },
 
   onUserDocumentKeyup: function(e){
