@@ -45,7 +45,7 @@ CATARSE.MoipForm = Backbone.View.extend({
       }
 
       // Go on otherwise
-      if(data.url) {
+      if(data.url && $('#payment_type_cards_section').css('display') != 'block') {
         var link = $('<a target="__blank">'+data.url+'</a>')
         link.attr('href', data.url);
         $('.link_content:visible').empty().html(link);
