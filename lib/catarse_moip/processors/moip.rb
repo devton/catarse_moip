@@ -49,9 +49,11 @@ module CatarseMoip
         @backer.payment_notifications.create! extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
         case params[:status_pagamento].to_i
         when TransactionStatus::AUTHORIZED
-          @backer.confirm! unless @backer.confirmed
+          @backer.confirm! unless @backer.confirmed?
         when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
           @backer.refund! unless @backer.refunded?
+        when TransactionStatus::CANCELED
+          @backer.cancel! unless @backer.canceled?
         end
       end
     end
