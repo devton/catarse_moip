@@ -19,6 +19,8 @@ module CatarseMoip::Payment
       @backer = current_user.backs.find params[:id]
 
       @backer.payment_notifications.create(extra_data: params[:response])
+      
+      @backer.waiting if @backer.pending?
 
       unless params[:response]['StatusPagamento'] == 'Falha'
         @processor = CatarseMoip::Processors::Moip.new @backer
