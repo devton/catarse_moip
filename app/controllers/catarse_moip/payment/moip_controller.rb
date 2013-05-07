@@ -18,13 +18,17 @@ module CatarseMoip::Payment
     def moip_response
       @backer = current_user.backs.find params[:id]
 
-      @backer.payment_notifications.create(extra_data: params[:response])
+      # This lock tries to solve the deadlock we are having on backer updates
+      @backer.with_lock do
 
-      unless params[:response]['StatusPagamento'] == 'Falha'
-        @processor = CatarseMoip::Processors::Moip.new @backer
-        @processor.process!(params)
+        @backer.payment_notifications.create(extra_data: params[:response])
+
+        unless params[:response]['StatusPagamento'] == 'Falha'
+          @processor = CatarseMoip::Processors::Moip.new @backer
+          @processor.process!(params)
+        end
+
       end
-
       render nothing: true, status: 200
     end
 
