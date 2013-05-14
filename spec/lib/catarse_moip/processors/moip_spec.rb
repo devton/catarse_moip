@@ -41,7 +41,7 @@ describe CatarseMoip::Processors::Moip do
   end
 
   let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>2190, "cod_moip"=>12345123, "forma_pagamento"=>1, "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com"} }
-  let(:backer){ create(:backer, :confirmed => false, :refunded => false) }
+  let(:backer){ create(:backer) }
   let(:processor){ CatarseMoip::Processors::Moip.new backer }
 
   describe "#update_backer" do
@@ -101,12 +101,13 @@ describe CatarseMoip::Processors::Moip do
     end
 
     context "when there is a written back request" do
+      let(:backer){ create(:backer, state: 'confirmed') }
       before do
         processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK})
       end
 
       it 'should mark refunded to true' do
-        backer.reload.refunded.should be_true
+        backer.reload.refunded?.should be_true
       end
 
       it 'should create a proper payment_notification' do
@@ -145,12 +146,13 @@ describe CatarseMoip::Processors::Moip do
     end
 
     context "when there is a refund request" do
+      let(:backer){ create(:backer, state: 'confirmed') }
       before do
         processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED})
       end
 
       it 'should mark refunded to true' do
-        backer.reload.refunded.should be_true
+        backer.reload.refunded?.should be_true
       end
 
       it 'should create a proper payment_notification' do
