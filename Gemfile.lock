@@ -1,6 +1,7 @@
 GIT
   remote: git://github.com/catarse/catarse_mailchimp
-  revision: a5be917969a1df6010fbbdea25a5c1407c6f8659
+  revision: 45dc426a68e97e2e2490ee058b7033c70b5a83d4
+  ref: 45dc426
   specs:
     catarse_mailchimp (0.0.1)
       mailchimp
@@ -8,8 +9,8 @@ GIT
 
 GIT
   remote: git://github.com/catarse/catarse_paypal_express.git
-  revision: bce4d8c0c76279382f10cad101f48de4e109e3a8
-  ref: bce4d8c
+  revision: 0e4f46baf54a8f02140dfa32649d9467d6fb98bf
+  ref: 0e4f46baf54a8f02140dfa32649d9467d6fb98bf
   specs:
     catarse_paypal_express (0.1.0)
       activemerchant (~> 1.17.0)
@@ -96,6 +97,11 @@ GEM
     best_in_place (2.1.0)
       jquery-rails
       rails (~> 3.1)
+    better_errors (0.8.0)
+      coderay (>= 1.0.0)
+      erubis (>= 2.6.6)
+    binding_of_caller (0.7.1)
+      debug_inspector (>= 0.0.1)
     bourne (1.1.2)
       mocha (= 0.10.5)
     braintree (2.22.0)
@@ -117,6 +123,7 @@ GEM
     childprocess (0.3.9)
       ffi (~> 1.0, >= 1.0.11)
     chunky_png (1.2.7)
+    coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -124,6 +131,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.1)
+    colorize (0.5.8)
     compass (0.12.2)
       chunky_png (~> 1.2)
       fssm (>= 0.2.7)
@@ -133,10 +141,16 @@ GEM
     compass-rails (1.0.3)
       compass (>= 0.12.2, < 0.14)
     connection_pool (1.0.0)
+    coveralls (0.6.7)
+      colorize
+      multi_json (~> 1.3)
+      rest-client
+      simplecov (>= 0.7)
+      thor
     crack (0.1.8)
     curb (0.7.18)
-    daemons (1.1.9)
     database_cleaner (0.9.1)
+    debug_inspector (0.0.2)
     devise (2.2.3)
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
@@ -150,7 +164,6 @@ GEM
     enumerate_it (1.0.3)
       activesupport (>= 3.0.0)
     erubis (2.7.0)
-    eventmachine (1.0.3)
     excon (0.6.6)
     execjs (1.4.0)
       multi_json (~> 1.0)
@@ -189,13 +202,10 @@ GEM
     formtastic (2.1.1)
       actionpack (~> 3.0)
     fssm (0.2.10)
-    haml (4.0.0)
-      tilt
     has_scope (0.5.1)
-    has_vimeo_video (0.0.5)
-      supermodel
-      vimeo
     hashie (1.2.0)
+    heroku-deflater (0.4.2)
+      rack (>= 1.4.5)
     hike (1.2.1)
     http_accept_language (1.0.2)
     httparty (0.6.1)
@@ -209,6 +219,12 @@ GEM
     initjs (1.0.0)
       jquery-rails
       rails (>= 3.1)
+    jasmine (1.3.2)
+      jasmine-core (~> 1.3.1)
+      rack (~> 1.0)
+      rspec (>= 1.3.1)
+      selenium-webdriver (>= 0.1.3)
+    jasmine-core (1.3.1)
     journey (1.0.4)
     jquery-rails (2.2.1)
       railties (>= 3.0, < 5.0)
@@ -219,8 +235,11 @@ GEM
     kaminari (0.14.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
+    kgio (2.8.0)
     launchy (2.2.0)
       addressable (~> 2.3)
+    letter_opener (1.1.1)
+      launchy (~> 2.2)
     libxml-ruby (2.3.3)
     loofah (1.0.0)
       nokogiri (>= 1.3.3)
@@ -228,15 +247,6 @@ GEM
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    mailcatcher (0.5.11)
-      activesupport (~> 3.0)
-      eventmachine (~> 1.0.0)
-      haml (>= 3.1, < 5)
-      mail (~> 2.3)
-      sinatra (~> 1.2)
-      skinny (~> 0.2.3)
-      sqlite3 (~> 1.3)
-      thin (~> 1.5.0)
     mailchimp (0.0.8)
       httparty
     metaclass (0.0.1)
@@ -248,6 +258,7 @@ GEM
     net-scp (1.1.0)
       net-ssh (>= 2.6.5)
     net-ssh (2.6.6)
+    newrelic_rpm (3.6.2.96)
     nokogiri (1.4.7)
     oauth (0.4.7)
     oauth2 (0.8.1)
@@ -287,6 +298,8 @@ GEM
     rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
+    rack-mini-profiler (0.1.26)
+      rack (>= 1.1.3)
     rack-protection (1.5.0)
       rack
     rack-ssl (1.3.3)
@@ -311,6 +324,7 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
+    raindrops (0.11.0)
     rake (10.0.3)
     rdoc (3.12.2)
       json (~> 1.4)
@@ -321,10 +335,16 @@ GEM
     request_store (1.0.5)
     responders (0.9.3)
       railties (~> 3.1)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     rinku (1.7.2)
     rmagick (2.13.2)
     routing-filter (0.3.1)
       actionpack
+    rspec (2.13.0)
+      rspec-core (~> 2.13.0)
+      rspec-expectations (~> 2.13.0)
+      rspec-mocks (~> 2.13.0)
     rspec-core (2.13.1)
     rspec-expectations (2.13.0)
       diff-lcs (>= 1.1.3, < 2.0)
@@ -368,13 +388,14 @@ GEM
       multi_json (~> 1)
       redis (~> 3)
       redis-namespace
+    simplecov (0.7.1)
+      multi_json (~> 1.0)
+      simplecov-html (~> 0.7.1)
+    simplecov-html (0.7.1)
     sinatra (1.3.5)
       rack (~> 1.4)
       rack-protection (~> 1.3)
       tilt (~> 1.3, >= 1.3.3)
-    skinny (0.2.3)
-      eventmachine (~> 1.0.0)
-      thin (~> 1.5.0)
     slim (1.3.6)
       temple (~> 0.5.5)
       tilt (~> 1.3.3)
@@ -390,16 +411,11 @@ GEM
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
-    sqlite3 (1.3.7)
     state_machine (1.1.2)
     supermodel (0.1.4)
       activemodel (>= 3.0.0.beta)
     tag_helper (0.0.3)
     temple (0.5.5)
-    thin (1.5.0)
-      daemons (>= 1.0.9)
-      eventmachine (>= 0.12.6)
-      rack (>= 1.0.0)
     thor (0.17.0)
     tilt (1.3.5)
     timers (1.1.0)
@@ -410,13 +426,14 @@ GEM
     uglifier (1.0.4)
       execjs (>= 0.3.0)
       multi_json (>= 1.0.2)
+    unicorn (4.6.2)
+      kgio (~> 2.6)
+      rack
+      raindrops (~> 0.7)
     valuable (0.9.8)
-    vimeo (1.5.3)
-      httparty (>= 0.4.5)
-      httpclient (>= 2.1.5.2)
-      json (>= 1.1.9)
-      multipart-post (>= 1.0.1)
-      oauth (>= 0.4.3)
+    video_info (1.4.0)
+      addressable
+      multi_json
     warden (1.2.1)
       rack (>= 1.0)
     websocket (1.0.7)
@@ -433,6 +450,8 @@ DEPENDENCIES
   airbrake
   auto_html (= 1.4.2)
   best_in_place
+  better_errors
+  binding_of_caller
   cancan!
   capybara (~> 2.0.2)
   carrierwave (~> 0.7.0)
@@ -442,6 +461,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.2)
   compass-960-plugin (~> 0.10.4)
   compass-rails (~> 1.0.2)
+  coveralls
   database_cleaner
   devise
   draper
@@ -452,18 +472,20 @@ DEPENDENCIES
   foreman
   formtastic (~> 2.1.1)
   has_scope
-  has_vimeo_video (~> 0.0.5)
+  heroku-deflater (~> 0.4.1)
   http_accept_language
   httparty (~> 0.6.1)
   httpclient (= 2.2.5)
   inherited_resources (= 1.3.1)
   initjs
+  jasmine
   jquery-rails
   kaminari
   launchy
-  mailcatcher
+  letter_opener
   mocha (~> 0.10.4)
   moip!
+  newrelic_rpm
   omniauth
   omniauth-facebook (= 1.4.0)
   omniauth-twitter
@@ -471,6 +493,7 @@ DEPENDENCIES
   pg
   pg_search
   postgres-copy
+  rack-mini-profiler
   rack-timeout
   rails (= 3.2.12)
   rails_autolink (~> 1.0.7)
@@ -483,11 +506,11 @@ DEPENDENCIES
   shoulda
   sidekiq (~> 2.7.5)
   sinatra
-  slim
   slim-rails
   spectator-validates_email
   state_machine
-  thin
   uglifier (~> 1.0.3)
+  unicorn
   validation_reflection!
+  video_info
   weekdays

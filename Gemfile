@@ -5,6 +5,7 @@ source "http://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
+# For heroku
 ruby '1.9.3'
 
 gem 'rails',    '3.2.12'
@@ -28,10 +29,11 @@ gem 'schema_plus'
 gem 'schema_associations'
 
 # Payment engine using Paypal
-gem 'catarse_paypal_express', git: 'git://github.com/catarse/catarse_paypal_express.git',  ref: 'bce4d8c'
+gem 'catarse_paypal_express', git: 'git://github.com/catarse/catarse_paypal_express.git',  ref: '0e4f46baf54a8f02140dfa32649d9467d6fb98bf'
 
 # Payment engine using Moip
-#gem 'catarse_moip',           git: 'git://github.com/catarse/catarse_moip.git', ref: '98f992428fcd5c4fc6edabd647ace9425b1e578a'
+#gem 'catarse_moip',           git: 'git://github.com/catarse/catarse_moip.git', ref: '6113a20d67d7be0e24dc37f68f2711f5d22248a3'
+#gem 'catarse_moip',           path: '../catarse_moip'
 
 # TODO: Check the Catarse_Moip dependency
 gem 'moip', git: 'git://github.com/moiplabs/moip-ruby.git'
@@ -40,7 +42,6 @@ gem 'moip', git: 'git://github.com/moiplabs/moip-ruby.git'
 gem 'draper'
 
 # Frontend stuff
-gem 'slim'
 gem 'slim-rails'
 gem 'jquery-rails'
 gem 'initjs'
@@ -60,7 +61,7 @@ gem 'cancan', git: 'git://github.com/ryanb/cancan.git', branch: '2.0', ref: 'f1c
 gem "airbrake"
 
 # Email marketing
-gem 'catarse_mailchimp', git: 'git://github.com/catarse/catarse_mailchimp'
+gem 'catarse_mailchimp', git: 'git://github.com/catarse/catarse_mailchimp', ref: '45dc426'
 
 # HTML manipulation and formatting
 gem 'formtastic',   '~> 2.1.1'
@@ -70,7 +71,6 @@ gem 'kaminari'
 # Uploads
 gem 'carrierwave', '~> 0.7.0'
 gem 'rmagick'
-gem 'fog'
 
 # Other Tools
 gem 'feedzirra'
@@ -78,7 +78,7 @@ gem 'validation_reflection',      git: 'git://github.com/ncri/validation_reflect
 gem 'inherited_resources',        '1.3.1'
 gem 'has_scope'
 gem 'spectator-validates_email',  require: 'validates_email'
-gem 'has_vimeo_video',            '~> 0.0.5'
+gem 'video_info'
 gem 'enumerate_it'
 gem 'httparty', '~> 0.6.1' # this version is required by moip gem, otherwise payment confirmation will break
 
@@ -90,12 +90,37 @@ gem 'routing-filter'
 gem 'activemerchant', '1.17.0', require: 'active_merchant'
 gem 'httpclient',     '2.2.5'
 
-# Server
-gem 'thin'
+
+
+group :production do
+
+  # Gem used to handle image uploading
+  gem 'fog'
+
+  # Workers, forks and all that jazz
+  gem 'unicorn'
+
+  # Enabling Gzip on Heroku
+  # If you don't use Heroku, please comment the line below.
+  gem 'heroku-deflater', '~> 0.4.1'
+
+
+  # Monitoring with the new new relic
+  gem 'newrelic_rpm'
+
+  # Using dalli and memcachier have not presented significative performance gains
+  # Probably this is due to our pattern of cache usage 
+  # + the lack of concurrent procs in our deploy
+  #gem 'memcachier'
+  #gem 'dalli'
+end
 
 group :development do
-  gem 'mailcatcher'
+  gem "letter_opener"
   gem 'foreman'
+  gem 'better_errors'
+  gem 'binding_of_caller'
+  gem 'rack-mini-profiler'
 end
 
 group :test, :development do
@@ -109,6 +134,8 @@ group :test do
   gem 'shoulda'
   gem 'factory_girl_rails'
   gem 'capybara',   '~> 2.0.2'
+  gem 'jasmine'
+  gem 'coveralls', require: false
 end
 
 
