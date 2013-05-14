@@ -22,9 +22,9 @@ module CatarseMoip
       @backer = PaymentEngines.find_payment key: params[:id_transacao]
       process_moip_message(params)
       return render :nothing => true, :status => 200
-    #rescue Exception => e
-      #::Airbrake.notify({ :error_class => "MoIP notification", :error_message => "MoIP notification: #{e.inspect}", :parameters => params}) rescue nil
-      #return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
+    rescue Exception => e
+      ::Airbrake.notify({ :error_class => "MoIP notification", :error_message => "MoIP notification: #{e.inspect}", :parameters => params}) rescue nil
+      return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
     end
 
     def js

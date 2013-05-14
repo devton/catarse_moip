@@ -5,7 +5,7 @@ describe CatarseMoip::MoipController do
   subject{ response }
 
   let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
-  let(:backer){ double('backer') }
+  let(:backer){ double('backer', key: 'backer key', payment_id: 'payment id') }
   let(:user){ double('user') }
   let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>"2190", "cod_moip"=>"12345123", "forma_pagamento"=>"1", "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com", "controller"=>"catarse_moip/payment/notifications", "action"=>"create"} }
 
@@ -21,15 +21,17 @@ describe CatarseMoip::MoipController do
   describe "POST create_notification" do
     context "when we search for a non-existant backer" do
       before do
+        PaymentEngines.should_receive(:find_payment).with(key: "non-existant backer key").and_raise('error')
         post :create_notification, {:id_transacao => "non-existant backer key", :use_route => 'catarse_moip'}
       end
 
-      its(:body){ should == "#<ActiveRecord::RecordNotFound: Couldn't find Backer with key = non-existant backer key>: Couldn't find Backer with key = non-existant backer key recebemos: {\"id_transacao\"=>\"non-existant backer key\", \"controller\"=>\"catarse_moip/payment/notifications\", \"action\"=>\"create\"}" }
       its(:status){ should == 422 }
+      its(:body){ should == "#<RuntimeError: error>: error recebemos: {\"id_transacao\"=>\"non-existant backer key\", \"controller\"=>\"catarse_moip/moip\", \"action\"=>\"create_notification\"}" }
     end
 
     context "when we seach for an existing backer" do
       before do
+        PaymentEngines.should_receive(:find_payment).with(key: backer.key).and_return(backer)
         controller.should_receive(:process_notification).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/payment/notifications", "action"=>"create"})
         post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
       end
