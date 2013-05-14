@@ -1,10 +1,12 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe CatarseMoip::Payment::MoipController do
+describe CatarseMoip::MoipController do
   subject{ response }
 
   let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
+  let(:backer){ create(:backer, :value => 21.90, :confirmed => true, :refunded => false) }
+  let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>"2190", "cod_moip"=>"12345123", "forma_pagamento"=>"1", "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com", "controller"=>"catarse_moip/payment/notifications", "action"=>"create"} }
 
   before do
     @backer = FactoryGirl.create(:backer, :confirmed => false)
@@ -13,6 +15,29 @@ describe CatarseMoip::Payment::MoipController do
     ::MoipTransparente::Checkout.any_instance.stub(:moip_widget_tag).and_return('<div>')
     ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')
     ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
+    PaymentEngines.stub(:find_payment).and_return(backer)
+  end
+
+  describe "POST create_notification" do
+    context "when we search for a non-existant backer" do
+      before do
+        post :create_notification, {:id_transacao => "non-existant backer key", :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == "#<ActiveRecord::RecordNotFound: Couldn't find Backer with key = non-existant backer key>: Couldn't find Backer with key = non-existant backer key recebemos: {\"id_transacao\"=>\"non-existant backer key\", \"controller\"=>\"catarse_moip/payment/notifications\", \"action\"=>\"create\"}" }
+      its(:status){ should == 422 }
+    end
+
+    context "when we seach for an existing backer" do
+      before do
+        controller.should_receive(:process_notification).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/payment/notifications", "action"=>"create"})
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
   end
 
   describe "GET js" do
@@ -44,8 +69,7 @@ describe CatarseMoip::Payment::MoipController do
   describe "POST moip_response" do
     let(:processor){ double('moip processor') }
     before do
-      CatarseMoip::Processors::Moip.should_receive(:new).with(@backer).and_return(processor)
-      processor.should_receive(:process!)
+      controller.should_receive(:process_notification)
       post :moip_response, id: @backer.id, response: {StatusPagamento: 'Sucesso'}, use_route: 'catarse_moip'
     end
 

@@ -2,7 +2,7 @@ CatarseMoip::Engine.routes.draw do
   namespace :payment do
     resources :moip, only: [] do
       collection do
-        post 'notifications' => "notifications#create"
+        post 'notifications' => "moip#create_notification"
         get 'js'
       end
       member do
