@@ -20,7 +20,7 @@ module CatarseMoip
 
     def create_notification
       @backer = PaymentEngines.find_payment key: params[:id_transacao]
-      process_moip_message params
+      process_moip_message(params)
       return render :nothing => true, :status => 200
     #rescue Exception => e
       #::Airbrake.notify({ :error_class => "MoIP notification", :error_message => "MoIP notification: #{e.inspect}", :parameters => params}) rescue nil
@@ -90,31 +90,31 @@ module CatarseMoip
 
       render json: { get_token_response: response, moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
-  end
 
-  def update_backer
-    response = ::MoIP.query(@backer.payment_token)
-    if response && response["Autorizacao"]
-      pagamento = response["Autorizacao"]["Pagamento"]
-      pagamento = pagamento.first unless pagamento.respond_to?(:key)
-      @backer.update_attributes({
-        :payment_id => pagamento["CodigoMoIP"],
-        :payment_choice => pagamento["FormaPagamento"],
-        :payment_service_fee => pagamento["TaxaMoIP"]
-      })
+    def update_backer
+      response = ::MoIP.query(@backer.payment_token)
+      if response && response["Autorizacao"]
+        pagamento = response["Autorizacao"]["Pagamento"]
+        pagamento = pagamento.first unless pagamento.respond_to?(:key)
+        @backer.update_attributes({
+          :payment_id => pagamento["CodigoMoIP"],
+          :payment_choice => pagamento["FormaPagamento"],
+          :payment_service_fee => pagamento["TaxaMoIP"]
+        })
+      end
     end
-  end
 
-  def process_moip_message params
-    update_backer if @backer.payment_id.nil?
-    @backer.payment_notifications.create! extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
-    case params[:status_pagamento].to_i
-    when TransactionStatus::AUTHORIZED
-      @backer.confirm! unless @backer.confirmed?
-    when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
-      @backer.refund! unless @backer.refunded?
-    when TransactionStatus::CANCELED
-      @backer.cancel! unless @backer.canceled?
+    def process_moip_message params
+      update_backer if @backer.payment_id.nil?
+      @backer.payment_notifications.create! extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
+      case params[:status_pagamento].to_i
+      when TransactionStatus::AUTHORIZED
+        @backer.confirm! unless @backer.confirmed?
+      when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
+        @backer.refund! unless @backer.refunded?
+      when TransactionStatus::CANCELED
+        @backer.cancel! unless @backer.canceled?
+      end
     end
   end
 end
