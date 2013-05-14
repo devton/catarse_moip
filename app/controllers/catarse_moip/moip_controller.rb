@@ -2,7 +2,7 @@ require 'moip_transparente'
 
 module CatarseMoip
   class MoipController < ApplicationController
-    class TransactionStatus < EnumerateIt::Base
+    class TransactionStatus < ::EnumerateIt::Base
       associate_values(
         :authorized =>      1,
         :started =>         2,

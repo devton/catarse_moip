@@ -2,7 +2,6 @@
 ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path("../../test/dummy/config/environment", __FILE__)
 require 'rspec/rails'
-#require 'fakeweb'
 
 ENGINE_RAILS_ROOT=File.join(File.dirname(__FILE__), '../')
 
@@ -12,14 +11,6 @@ Dir[File.join(ENGINE_RAILS_ROOT, 'spec/support/**/*.rb')].each {|f| require f }
 
 
 RSpec.configure do |config|
-  # ## Mock Framework
-  #
-  # If you prefer to use mocha, flexmock or RR, uncomment the appropriate line:
-  #
-  # config.mock_with :mocha
-  # config.mock_with :flexmock
-  # config.mock_with :rr
-
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{ENGINE_RAILS_ROOT}/spec/fixtures"
 
@@ -35,31 +26,24 @@ RSpec.configure do |config|
 
   # Include Engine routes (needed for Controller specs)
   config.include CatarseMoip::Engine.routes.url_helpers
-
-  # Include Catarse routes
-  config.include Catarse::Application.routes.url_helpers
-
-  config.include Devise::TestHelpers, :type => :controller
-
   config.include FactoryGirl::Syntax::Methods
+
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with :truncation
   end
 
   config.before(:each) do
-    Project.any_instance.stub(:store_image_url).and_return('http://www.store_image_url.com')
-    Notification.stub(:create_notification)
+    PaymentEngines.stub(:configuration).and_return({})
   end
 end
-
-RoutingFilter.active = false # Because this issue: https://github.com/svenfuchs/routing-filter/issues/36
 
 def fixture_file(filename)
   return nil if filename.nil?
   file_path = File.expand_path(File.dirname(__FILE__) + '/fixtures/' + filename)
   File.read(file_path)
 end
+
 def post_moip_params
   {
     :id_transacao => 'ABCD',
