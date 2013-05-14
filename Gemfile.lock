@@ -127,7 +127,6 @@ DEPENDENCIES
   catarse_moip!
   database_cleaner
   enumerate_it
-  factory_girl
   factory_girl_rails
   moip!
   pg

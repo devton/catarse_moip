@@ -5,12 +5,12 @@ describe CatarseMoip::MoipController do
   subject{ response }
 
   let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
-  let(:backer){ create(:backer, :value => 21.90, :confirmed => true, :refunded => false) }
+  let(:backer){ double('backer') }
+  let(:user){ double('user') }
   let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>"2190", "cod_moip"=>"12345123", "forma_pagamento"=>"1", "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com", "controller"=>"catarse_moip/payment/notifications", "action"=>"create"} }
 
   before do
-    @backer = FactoryGirl.create(:backer, :confirmed => false)
-    controller.stub(:current_user).and_return(@backer.user)
+    controller.stub(:current_user).and_return(user)
     ::MoipTransparente::Checkout.any_instance.stub(:get_token).and_return(get_token_response)
     ::MoipTransparente::Checkout.any_instance.stub(:moip_widget_tag).and_return('<div>')
     ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')

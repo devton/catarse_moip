@@ -26,12 +26,6 @@ RSpec.configure do |config|
 
   # Include Engine routes (needed for Controller specs)
   config.include CatarseMoip::Engine.routes.url_helpers
-  config.include FactoryGirl::Syntax::Methods
-
-  config.before(:suite) do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with :truncation
-  end
 
   config.before(:each) do
     PaymentEngines.stub(:configuration).and_return({})
