@@ -7,8 +7,15 @@ module CatarseMoip::Payment
     layout :false
 
     def js
-      @moip = ::MoipTransparente::Checkout.new
-      render :text => open(@moip.get_javascript_url).set_encoding('ISO-8859-1').read.encode('utf-8')
+      tries = 0
+      begin
+        @moip = ::MoipTransparente::Checkout.new
+        render :text => open(@moip.get_javascript_url).set_encoding('ISO-8859-1').read.encode('utf-8')
+      rescue Exception => e
+        tries += 1
+        retry unless tries > 3
+        raise e
+      end
     end
 
     def review

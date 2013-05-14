@@ -15,6 +15,32 @@ describe CatarseMoip::Payment::MoipController do
     ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
   end
 
+  describe "GET js" do
+    let(:file){ double('js_file') }
+
+    context "when the content of get_javascript_url raises an error" do
+      before do
+        controller.should_receive(:open).at_least(3).times.and_raise('error') 
+        ->{
+          get :js, locale: :pt, use_route: 'catarse_moip'
+        }.should raise_error('error')
+      end
+      its(:status){ should == 200 }
+    end
+
+    context "when the content of get_javascript_url is read without errors" do
+      before do
+        controller.should_receive(:open).and_return(file) 
+        file.should_receive(:set_encoding).and_return(file)
+        file.should_receive(:read).and_return(file)
+        file.should_receive(:encode).and_return('js content')
+        get :js, locale: :pt, use_route: 'catarse_moip'
+      end
+      its(:status){ should == 200 }
+      its(:body){ should == 'js content' }
+    end
+  end
+
   describe "POST moip_response" do
     let(:processor){ double('moip processor') }
     before do
