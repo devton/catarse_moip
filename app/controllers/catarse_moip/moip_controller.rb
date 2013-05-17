@@ -23,7 +23,6 @@ module CatarseMoip
       process_moip_message(params)
       return render :nothing => true, :status => 200
     rescue Exception => e
-      ::Airbrake.notify({ :error_class => "MoIP notification", :error_message => "MoIP notification: #{e.inspect}", :parameters => params}) rescue nil
       return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
     end
 
@@ -45,7 +44,7 @@ module CatarseMoip
 
     def moip_response
       @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
-      @backer.payment_notifications.create(extra_data: params[:response])
+      PaymentEngines.create_payment_notification backer_id: @backer.id, extra_data: params[:response]
       @backer.waiting! if @backer.pending?
 
       process_moip_message params unless params[:response]['StatusPagamento'] == 'Falha'
@@ -56,9 +55,9 @@ module CatarseMoip
     def get_moip_token
       @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
 
-      ::MoipTransparente::Config.test = (::Configuration[:moip_test] == 'true')
-      ::MoipTransparente::Config.access_token = ::Configuration[:moip_token]
-      ::MoipTransparente::Config.access_key = ::Configuration[:moip_key]
+      ::MoipTransparente::Config.test = (PaymentEngines.configuration[:moip_test] == 'true')
+      ::MoipTransparente::Config.access_token = PaymentEngines.configuration[:moip_token]
+      ::MoipTransparente::Config.access_key = PaymentEngines.configuration[:moip_key]
 
       @moip = ::MoipTransparente::Checkout.new
 
@@ -106,7 +105,7 @@ module CatarseMoip
 
     def process_moip_message params
       update_backer if @backer.payment_id.nil?
-      @backer.payment_notifications.create! extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
+      PaymentEngines.create_payment_notification backer_id: @backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
       case params[:status_pagamento].to_i
       when TransactionStatus::AUTHORIZED
         @backer.confirm! unless @backer.confirmed?

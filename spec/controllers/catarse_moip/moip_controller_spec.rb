@@ -5,8 +5,28 @@ describe CatarseMoip::MoipController do
   subject{ response }
 
   let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
-  let(:backer){ double('backer', key: 'backer key', payment_id: 'payment id') }
-  let(:user){ double('user') }
+  let(:backer){ double('backer', {
+    id: 1, 
+    key: 'backer key', 
+    payment_id: 'payment id', 
+    project: project, 
+    pending?: false, 
+    value: 10, 
+    user: user, 
+    payer_name: 'foo',
+    payer_email: 'foo@bar.com',
+    address_street: 'test',
+    address_number: '123',
+    address_complement: '123',
+    address_neighbourhood: '123',
+    address_city: '123',
+    address_state: '123',
+    address_zip_code: '123',
+    address_phone_number: '123'
+  }) }
+
+  let(:user){ double('user', id: 1) }
+  let(:project){ double('project', id: 1, name: 'test project') }
   let(:extra_data){ {"id_transacao"=>backer.key, "valor"=>"2190", "cod_moip"=>"12345123", "forma_pagamento"=>"1", "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com", "controller"=>"catarse_moip/payment/notifications", "action"=>"create"} }
 
   before do
@@ -16,6 +36,7 @@ describe CatarseMoip::MoipController do
     ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')
     ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
     PaymentEngines.stub(:find_payment).and_return(backer)
+    PaymentEngines.stub(:create_payment_notification)
   end
 
   describe "POST create_notification" do
@@ -32,7 +53,7 @@ describe CatarseMoip::MoipController do
     context "when we seach for an existing backer" do
       before do
         PaymentEngines.should_receive(:find_payment).with(key: backer.key).and_return(backer)
-        controller.should_receive(:process_notification).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/payment/notifications", "action"=>"create"})
+        controller.should_receive(:process_moip_message).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/moip", "action"=>"create_notification"})
         post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
       end
 
@@ -71,8 +92,8 @@ describe CatarseMoip::MoipController do
   describe "POST moip_response" do
     let(:processor){ double('moip processor') }
     before do
-      controller.should_receive(:process_notification)
-      post :moip_response, id: @backer.id, response: {StatusPagamento: 'Sucesso'}, use_route: 'catarse_moip'
+      controller.should_receive(:process_moip_message)
+      post :moip_response, id: backer.id, response: {StatusPagamento: 'Sucesso'}, use_route: 'catarse_moip'
     end
 
     its(:status){ should == 200 }
@@ -80,10 +101,10 @@ describe CatarseMoip::MoipController do
 
   describe "POST get_moip_token" do
     before do
-      post :get_moip_token, :id => @backer.id, :use_route => 'catarse_moip'
+      post :get_moip_token, :id => backer.id, :use_route => 'catarse_moip'
     end
 
     its(:status){ should == 200 }
-    its(:body){ should == "{\"get_token_response\":{\"status\":\"fail\",\"code\":\"171\",\"message\":\"TelefoneFixo do endere\\u00e7o dever\\u00e1 ser enviado obrigatorio\",\"id\":\"201210192052439150000024698931\"},\"moip\":\"{}\",\"widget_tag\":\"<div id='MoipWidget'\\n          data-token=''\\n          callback-method-success='checkoutSuccessful' \\n          callback-method-error='checkoutFailure'>\\n    </div>\",\"javascript_tag\":\"<script type='text/javascript' src='https://www.moip.com.br/transparente/MoipWidget-v2.js' charset='ISO-8859-1'></script>\"}" }
+    its(:body){ should == "{\"get_token_response\":{\"status\":\"fail\",\"code\":\"171\",\"message\":\"TelefoneFixo do endereço deverá ser enviado obrigatorio\",\"id\":\"201210192052439150000024698931\"},\"moip\":\"{}\",\"widget_tag\":\"<div id='MoipWidget'\\n          data-token=''\\n          callback-method-success='checkoutSuccessful' \\n          callback-method-error='checkoutFailure'>\\n    </div>\",\"javascript_tag\":\"<script type='text/javascript' src='https://www.moip.com.br/transparente/MoipWidget-v2.js' charset='ISO-8859-1'></script>\"}" }
   end
 end
