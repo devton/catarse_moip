@@ -2,6 +2,8 @@ require 'moip_transparente'
 
 module CatarseMoip
   class MoipController < ApplicationController
+    attr_accessor :backer
+
     class TransactionStatus < ::EnumerateIt::Base
       associate_values(
         :authorized =>      1,
@@ -44,8 +46,8 @@ module CatarseMoip
 
     def moip_response
       @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
-      PaymentEngines.create_payment_notification backer_id: @backer.id, extra_data: params[:response]
-      @backer.waiting! if @backer.pending?
+      PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: params[:response]
+      backer.waiting! if backer.pending?
 
       process_moip_message params unless params[:response]['StatusPagamento'] == 'Falha'
 
@@ -62,40 +64,40 @@ module CatarseMoip
       @moip = ::MoipTransparente::Checkout.new
 
       invoice = {
-        razao: "Apoio para o projeto '#{@backer.project.name}'",
-        id: @backer.key,
-        total: @backer.value.to_s,
+        razao: "Apoio para o projeto '#{backer.project.name}'",
+        id: backer.key,
+        total: backer.value.to_s,
         acrescimo: '0.00',
         desconto: '0.00',
         cliente: {
-          id: @backer.user.id,
-          nome: @backer.payer_name,
-          email: @backer.payer_email,
-          logradouro: "#{@backer.address_street}, #{@backer.address_number}",
-          complemento: @backer.address_complement,
-          bairro: @backer.address_neighbourhood,
-          cidade: @backer.address_city,
-          uf: @backer.address_state,
-          cep: @backer.address_zip_code,
-          telefone: @backer.address_phone_number
+          id: backer.user.id,
+          nome: backer.payer_name,
+          email: backer.payer_email,
+          logradouro: "#{backer.address_street}, #{backer.address_number}",
+          complemento: backer.address_complement,
+          bairro: backer.address_neighbourhood,
+          cidade: backer.address_city,
+          uf: backer.address_state,
+          cep: backer.address_zip_code,
+          telefone: backer.address_phone_number
         }
       }
 
       response = @moip.get_token(invoice)
 
-      session[:thank_you_id] = @backer.project.id
+      session[:thank_you_id] = backer.project.id
 
-      @backer.update_column :payment_token, response[:token] if response and response[:token]
+      backer.update_column :payment_token, response[:token] if response and response[:token]
 
       render json: { get_token_response: response, moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
 
     def update_backer
-      response = ::MoIP.query(@backer.payment_token)
+      response = ::MoIP.query(backer.payment_token)
       if response && response["Autorizacao"]
         pagamento = response["Autorizacao"]["Pagamento"]
         pagamento = pagamento.first unless pagamento.respond_to?(:key)
-        @backer.update_attributes({
+        backer.update_attributes({
           :payment_id => pagamento["CodigoMoIP"],
           :payment_choice => pagamento["FormaPagamento"],
           :payment_service_fee => pagamento["TaxaMoIP"]
@@ -104,15 +106,15 @@ module CatarseMoip
     end
 
     def process_moip_message params
-      update_backer if @backer.payment_id.nil?
-      PaymentEngines.create_payment_notification backer_id: @backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
+      update_backer if backer.payment_id.nil?
+      PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
       case params[:status_pagamento].to_i
       when TransactionStatus::AUTHORIZED
-        @backer.confirm! unless @backer.confirmed?
+        backer.confirm! unless backer.confirmed?
       when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
-        @backer.refund! unless @backer.refunded?
+        backer.refund! unless backer.refunded?
       when TransactionStatus::CANCELED
-        @backer.cancel! unless @backer.canceled?
+        backer.cancel! unless backer.canceled?
       end
     end
   end

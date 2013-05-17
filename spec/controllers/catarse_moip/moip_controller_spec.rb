@@ -107,4 +107,133 @@ describe CatarseMoip::MoipController do
     its(:status){ should == 200 }
     its(:body){ should == "{\"get_token_response\":{\"status\":\"fail\",\"code\":\"171\",\"message\":\"TelefoneFixo do endereço deverá ser enviado obrigatorio\",\"id\":\"201210192052439150000024698931\"},\"moip\":\"{}\",\"widget_tag\":\"<div id='MoipWidget'\\n          data-token=''\\n          callback-method-success='checkoutSuccessful' \\n          callback-method-error='checkoutFailure'>\\n    </div>\",\"javascript_tag\":\"<script type='text/javascript' src='https://www.moip.com.br/transparente/MoipWidget-v2.js' charset='ISO-8859-1'></script>\"}" }
   end
+
+  describe "#update_backer" do
+    before do
+      controller.stub(:backer).and_return(backer)
+      backer.stub(:payment_token).and_return('token')
+      MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+    end
+
+    context "with no response from moip" do
+      let(:moip_query_response) { nil }
+      before{ backer.should_not_receive(:update_attributes) }
+      it("should never call update attributes"){ controller.update_backer }
+    end
+
+    context "with an incomplete transaction" do
+      let(:moip_query_response) do
+        {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso"}
+      end
+      before{ backer.should_not_receive(:update_attributes) }
+      it("should never call update attributes"){ controller.update_backer }
+    end
+
+    context "with a real data set that works for some cases" do
+      let(:moip_query_response) do
+        {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso", "Autorizacao"=>{"Pagador"=>{"Nome"=>"juliana.giopato@hotmail.com", "Email"=>"juliana.giopato@hotmail.com"}, "EnderecoCobranca"=>{"Logradouro"=>"Rua sócrates abraão ", "Numero"=>"16.0", "Complemento"=>"casa 19", "Bairro"=>"Campo Limpo", "CEP"=>"05782-470", "Cidade"=>"São Paulo", "Estado"=>"SP", "Pais"=>"BRA", "TelefoneFixo"=>"1184719963"}, "Recebedor"=>{"Nome"=>"Catarse", "Email"=>"financeiro@catarse.me"}, "Pagamento"=>[{"Data"=>"2012-10-17T13:06:07.000-03:00", "DataCredito"=>"2012-10-19T00:00:00.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"1.34", "ValorLiquido"=>"48.66", "FormaPagamento"=>"BoletoBancario", "InstituicaoPagamento"=>"Bradesco", "Status"=>"Autorizado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5258"}, {"Data"=>"2012-10-17T13:05:49.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"3.09", "ValorLiquido"=>"46.91", "FormaPagamento"=>"CartaoDebito", "InstituicaoPagamento"=>"Visa", "Status"=>"Iniciado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5248"}]}}
+      end
+      before do
+        payment = moip_query_response["Autorizacao"]["Pagamento"].first
+        backer.should_receive(:update_attributes).with({
+          payment_id: payment["CodigoMoIP"],
+          payment_choice: payment["FormaPagamento"],
+          payment_service_fee: payment["TaxaMoIP"]
+        })
+      end
+      it("should call update attributes"){ controller.update_backer }
+    end
+  end
+
+  describe "#process_moip_message" do
+    before do
+      controller.stub(:backer).and_return(backer)
+      backer.stub(:confirmed?).and_return(false)
+      backer.stub(:confirm!)
+      controller.stub(:update_backer)
+    end
+
+    context "when we already have the payment_id in backers table" do
+      before do
+        backer.stub(:payment_id).and_return('test')
+        controller.should_not_receive(:update_backer)
+      end
+
+      it 'should never call update_backer' do
+        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
+      end
+    end
+
+    context "when we still do not have the payment_id in backers table" do
+      before do
+        backer.stub(:payment_id).and_return(nil)
+        controller.should_receive(:update_backer)
+      end
+
+      it 'should call update_backer on the processor' do
+        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
+      end
+    end
+
+    context "when there is a written back request" do
+      let(:backer){ create(:backer, state: 'confirmed') }
+      before do
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK})
+      end
+
+      it 'should mark refunded to true' do
+        backer.reload.refunded?.should be_true
+      end
+
+      it 'should create a proper payment_notification' do
+        backer.reload.payment_notifications.size.should == 1
+        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK)
+      end
+    end
+
+    context "when there is an authorized request" do
+      before do
+        processor.process!(Hashie::Mash.new({"id_transacao"=>"#{backer.key}", "valor"=>"5000", "status_pagamento"=>"1", "cod_moip"=>"13255258", "forma_pagamento"=>"73", "tipo_pagamento"=>"BoletoBancario", "parcelas"=>"1", "recebedor_login"=>"softa", "email_consumidor"=>"juliana.giopato@hotmail.com", "action"=>"create", "controller"=>"catarse_moip/payment/notifications"}))
+      end
+
+      it 'should confirm the backer' do
+        backer.reload.confirmed.should be_true
+      end
+    end
+
+    context "when there is an authorized request" do
+      before do
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
+      end
+
+      it 'should mark refunded to true' do
+        backer.reload.refunded.should be_false
+      end
+
+      it 'should create a proper payment_notification' do
+        backer.reload.payment_notifications.size.should == 1
+        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED)
+      end
+
+      it 'should confirm the backer' do
+        backer.reload.confirmed.should be_true
+      end
+    end
+
+    context "when there is a refund request" do
+      let(:backer){ create(:backer, state: 'confirmed') }
+      before do
+        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED})
+      end
+
+      it 'should mark refunded to true' do
+        backer.reload.refunded?.should be_true
+      end
+
+      it 'should create a proper payment_notification' do
+        backer.reload.payment_notifications.size.should == 1
+        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED)
+      end
+    end
+  end
 end
