@@ -175,64 +175,35 @@ describe CatarseMoip::MoipController do
       end
     end
 
-    context "when there is a written back request" do
-      let(:backer){ create(:backer, state: 'confirmed') }
+    context "when there is a written back request and backer is not refunded" do
       before do
-        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK})
+        backer.stub(:refunded?).and_return(false)
+        backer.should_receive(:refund!)
       end
 
-      it 'should mark refunded to true' do
-        backer.reload.refunded?.should be_true
-      end
-
-      it 'should create a proper payment_notification' do
-        backer.reload.payment_notifications.size.should == 1
-        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::WRITTEN_BACK)
+      it 'should call refund!' do
+        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::WRITTEN_BACK})
       end
     end
 
     context "when there is an authorized request" do
       before do
-        processor.process!(Hashie::Mash.new({"id_transacao"=>"#{backer.key}", "valor"=>"5000", "status_pagamento"=>"1", "cod_moip"=>"13255258", "forma_pagamento"=>"73", "tipo_pagamento"=>"BoletoBancario", "parcelas"=>"1", "recebedor_login"=>"softa", "email_consumidor"=>"juliana.giopato@hotmail.com", "action"=>"create", "controller"=>"catarse_moip/payment/notifications"}))
+        backer.should_receive(:confirm!)
       end
 
-      it 'should confirm the backer' do
-        backer.reload.confirmed.should be_true
-      end
-    end
-
-    context "when there is an authorized request" do
-      before do
-        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED})
-      end
-
-      it 'should mark refunded to true' do
-        backer.reload.refunded.should be_false
-      end
-
-      it 'should create a proper payment_notification' do
-        backer.reload.payment_notifications.size.should == 1
-        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::AUTHORIZED)
-      end
-
-      it 'should confirm the backer' do
-        backer.reload.confirmed.should be_true
+      it 'should call confirm!' do
+        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
       end
     end
 
     context "when there is a refund request" do
-      let(:backer){ create(:backer, state: 'confirmed') }
       before do
-        processor.process! post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED})
+        backer.stub(:refunded?).and_return(false)
+        backer.should_receive(:refund!)
       end
 
       it 'should mark refunded to true' do
-        backer.reload.refunded?.should be_true
-      end
-
-      it 'should create a proper payment_notification' do
-        backer.reload.payment_notifications.size.should == 1
-        backer.reload.payment_notifications.first.extra_data.should == extra_data.merge("status_pagamento" => CatarseMoip::Processors::Moip::TransactionStatus::REFUNDED)
+        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::REFUNDED})
       end
     end
   end
