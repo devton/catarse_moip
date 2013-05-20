@@ -1,4 +1,4 @@
-# CatarseMoip
+# CatarseMoip [![Build Status](https://travis-ci.org/catarse/catarse_moip.png)](https://travis-ci.org/catarse/catarse_moip) 
 
 Catarse moip integration with [Catarse](http://github.com/catarse/catarse) crowdfunding platform
 
