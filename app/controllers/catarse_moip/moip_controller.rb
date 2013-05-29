@@ -46,11 +46,7 @@ module CatarseMoip
 
     def moip_response
       @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
-      PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: params[:response]
-      backer.waiting! if backer.pending?
-
-      process_moip_message params unless params[:response]['StatusPagamento'] == 'Falha'
-
+      process_moip_message params[:response] unless params[:response]['StatusPagamento'] == 'Falha'
       render nothing: true, status: 200
     end
 
@@ -92,29 +88,38 @@ module CatarseMoip
       render json: { get_token_response: response, moip: @moip, widget_tag: @moip.widget_tag('checkoutSuccessful', 'checkoutFailure'), javascript_tag: @moip.javascript_tag }
     end
 
-    def update_backer
-      response = ::MoIP.query(backer.payment_token)
-      if response && response["Autorizacao"]
-        pagamento = response["Autorizacao"]["Pagamento"]
-        pagamento = pagamento.first unless pagamento.respond_to?(:key)
+    def update_backer params = nil
+      unless params && params["CodigoMoIP"] && params["TaxaMoIP"]
+        response = ::MoIP.query(backer.payment_token)
+        if response && response["Autorizacao"]
+          params = response["Autorizacao"]["Pagamento"]
+          params = params.first unless params.respond_to?(:key)
+        end
+      end
+
+      if params
         backer.update_attributes({
-          :payment_id => pagamento["CodigoMoIP"],
-          :payment_choice => pagamento["FormaPagamento"],
-          :payment_service_fee => pagamento["TaxaMoIP"]
+          :payment_id => params["CodigoMoIP"],
+          :payment_choice => params["FormaPagamento"],
+          :payment_service_fee => params["TaxaMoIP"]
         })
       end
     end
 
     def process_moip_message params
-      update_backer if backer.payment_id.nil?
       PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
-      case params[:status_pagamento].to_i
-      when TransactionStatus::AUTHORIZED
-        backer.confirm! unless backer.confirmed?
-      when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
-        backer.refund! unless backer.refunded?
-      when TransactionStatus::CANCELED
-        backer.cancel! unless backer.canceled?
+      backer.with_lock do
+        update_backer if backer.payment_id.nil?
+        case params[:status_pagamento].to_i
+        when TransactionStatus::AUTHORIZED
+          backer.confirm! unless backer.confirmed?
+        when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
+          backer.refund! unless backer.refunded?
+        when TransactionStatus::CANCELED
+          backer.cancel! unless backer.canceled?
+        else
+          backer.waiting! if backer.pending?
+        end
       end
     end
   end

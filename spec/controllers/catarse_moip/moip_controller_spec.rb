@@ -37,6 +37,7 @@ describe CatarseMoip::MoipController do
     ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
     PaymentEngines.stub(:find_payment).and_return(backer)
     PaymentEngines.stub(:create_payment_notification)
+    backer.stub(:with_lock).and_yield
   end
 
   describe "POST create_notification" do
@@ -112,12 +113,27 @@ describe CatarseMoip::MoipController do
     before do
       controller.stub(:backer).and_return(backer)
       backer.stub(:payment_token).and_return('token')
-      MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+    end
+
+    context "with parameters containing CodigoMoIP and TaxaMoIP" do
+      let(:payment){ {"Status" => "Autorizado","Codigo" => "0","CodigoRetorno" => "0","TaxaMoIP" => "1.54","StatusPagamento" => "Sucesso","CodigoMoIP" => "18093844","Mensagem" => "Requisição processada com sucesso","TotalPago" => "25.00","url" => "https => //www.moip.com.br/Instrucao.do?token=R2W0N123E005F2A911V6O2I0Y3S7M4J853H0S0F0T0D044T8F4H4E9G0I3W8"} }
+      before do
+        MoIP.should_not_receive(:query)
+        backer.should_receive(:update_attributes).with({
+          payment_id: payment["CodigoMoIP"],
+          payment_choice: payment["FormaPagamento"],
+          payment_service_fee: payment["TaxaMoIP"]
+        })
+      end
+      it("should call update attributes but not call MoIP.query"){ controller.update_backer payment }
     end
 
     context "with no response from moip" do
       let(:moip_query_response) { nil }
-      before{ backer.should_not_receive(:update_attributes) }
+      before do
+        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+        backer.should_not_receive(:update_attributes)
+      end
       it("should never call update attributes"){ controller.update_backer }
     end
 
@@ -125,7 +141,10 @@ describe CatarseMoip::MoipController do
       let(:moip_query_response) do
         {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso"}
       end
-      before{ backer.should_not_receive(:update_attributes) }
+      before do
+        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
+        backer.should_not_receive(:update_attributes)
+      end
       it("should never call update attributes"){ controller.update_backer }
     end
 
@@ -134,6 +153,7 @@ describe CatarseMoip::MoipController do
         {"ID"=>"201210191926185570000024694351", "Status"=>"Sucesso", "Autorizacao"=>{"Pagador"=>{"Nome"=>"juliana.giopato@hotmail.com", "Email"=>"juliana.giopato@hotmail.com"}, "EnderecoCobranca"=>{"Logradouro"=>"Rua sócrates abraão ", "Numero"=>"16.0", "Complemento"=>"casa 19", "Bairro"=>"Campo Limpo", "CEP"=>"05782-470", "Cidade"=>"São Paulo", "Estado"=>"SP", "Pais"=>"BRA", "TelefoneFixo"=>"1184719963"}, "Recebedor"=>{"Nome"=>"Catarse", "Email"=>"financeiro@catarse.me"}, "Pagamento"=>[{"Data"=>"2012-10-17T13:06:07.000-03:00", "DataCredito"=>"2012-10-19T00:00:00.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"1.34", "ValorLiquido"=>"48.66", "FormaPagamento"=>"BoletoBancario", "InstituicaoPagamento"=>"Bradesco", "Status"=>"Autorizado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5258"}, {"Data"=>"2012-10-17T13:05:49.000-03:00", "TotalPago"=>"50.00", "TaxaParaPagador"=>"0.00", "TaxaMoIP"=>"3.09", "ValorLiquido"=>"46.91", "FormaPagamento"=>"CartaoDebito", "InstituicaoPagamento"=>"Visa", "Status"=>"Iniciado", "Parcela"=>{"TotalParcelas"=>"1"}, "CodigoMoIP"=>"0000.1325.5248"}]}}
       end
       before do
+        MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         payment = moip_query_response["Autorizacao"]["Pagamento"].first
         backer.should_receive(:update_attributes).with({
           payment_id: payment["CodigoMoIP"],
