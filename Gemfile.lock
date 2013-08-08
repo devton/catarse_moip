@@ -12,7 +12,7 @@ PATH
   specs:
     catarse_moip (0.1.1)
       libxml-ruby (~> 2.6.0)
-      rails (~> 3.2.13)
+      rails (~> 3.2.12)
 
 GEM
   remote: http://rubygems.org/
