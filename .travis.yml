@@ -1,9 +1,15 @@
 rvm: 
   - 1.9.3
 
+node_js:
+    - "0.10"
+
 before_script:
   - "psql -c 'create role catarse SUPERUSER LOGIN;' postgres"
   - "psql -c 'create database catarse_test;' -U catarse postgres"
+  - "npm i -g jquery"
+  - "npm i -g jsdom"
+  - "npm i -g jasmine-node"
 
 script:
   - "bundle exec rake"
