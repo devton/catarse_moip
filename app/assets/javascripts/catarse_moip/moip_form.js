@@ -1,4 +1,4 @@
-CATARSE.MoipForm = Backbone.View.extend({
+App.addChild('MoipForm', {
   el: 'form.moip',
 
   getMoipToken: function(onSuccess){
@@ -70,10 +70,10 @@ CATARSE.MoipForm = Backbone.View.extend({
 
     this.loader = this.$('.loader');
 
-    this.paymentChoice = new CATARSE.PaymentChoice();
-    this.paymentCard = new CATARSE.PaymentCard({moipForm: this});
-    this.paymentSlip = new CATARSE.PaymentSlip({moipForm: this});
-    this.paymentAccount = new CATARSE.PaymentAccount({moipForm: this});
+    //this.paymentChoice = new CATARSE.PaymentChoice();
+    //this.paymentCard = new CATARSE.PaymentCard({moipForm: this});
+    //this.paymentSlip = new CATARSE.PaymentSlip({moipForm: this});
+    //this.paymentAccount = new CATARSE.PaymentAccount({moipForm: this});
     window.checkoutSuccessful = _.bind(this.checkoutSuccessful, this);
     window.checkoutFailure = _.bind(this.checkoutFailure, this);
   }
