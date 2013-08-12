@@ -6,7 +6,7 @@ before_script:
   - "psql -c 'create database catarse_test;' -U catarse postgres"
 
 script:
-  - "bundle exec rspec spec"
+  - "bundle exec rake"
 
 branches:
   only:
