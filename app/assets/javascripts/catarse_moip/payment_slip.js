@@ -13,8 +13,8 @@ App.views.MoipForm.addChild('PaymentSlip', _.extend({
     $('input#build_boleto').attr('disabled', !$documentField.hasClass('ok'));
   },
 
-  initialize: function(options){
-    this.moipForm = options.moipForm;
+  activate: function(options){
+    this.moipForm = this.parent;
     this.$('input#user_document_payment_slip').mask("999.999.999-99");
   },
 

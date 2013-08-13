@@ -8,9 +8,9 @@ App.views.MoipForm.addChild('PaymentCard', _.extend({
     'keyup #payment_card_cpf' : 'onUserDocumentKeyup'
   },
 
-  initialize: function(options){
+  activate: function(options){
     // Set credit card fields masks
-    this.moipForm = options.moipForm;
+    this.moipForm = this.parent;
     this.$('input#payment_card_date').mask('99/99');
     this.$('input#payment_card_birth').mask('99/99/9999');
     this.$('input#payment_card_cpf').mask("999.999.999-99");
