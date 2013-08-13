@@ -1,4 +1,4 @@
-CATARSE.PaymentCard = CATARSE.UserDocument.extend({
+App.views.MoipForm.addChild('PaymentCard', _.extend({
   el: '#payment_type_cards_section',
   
   events: {
@@ -86,5 +86,4 @@ CATARSE.PaymentCard = CATARSE.UserDocument.extend({
     }
     return 'Desconhecido';
   }
-});
-
+}, App.views.MoipForm.UserDocument));

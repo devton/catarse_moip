@@ -1,4 +1,4 @@
-CATARSE.PaymentChoice = Backbone.View.extend({
+App.views.MoipForm.addChild('PaymentChoice', {
   el: '.list_payment',
 
   events: {
@@ -12,7 +12,7 @@ CATARSE.PaymentChoice = Backbone.View.extend({
     });
   },
 
-  initialize: function(){
+  activate: function(){
     this.$('input#payment_type_cards').click();
   }
 });

@@ -3,7 +3,6 @@ App.addChild('MoipForm', {
 
   getMoipToken: function(onSuccess){
     var that = this;
-    //$('#MoipWidget').remove();
     if($('#MoipWidget').length > 0) {
       if(_.isFunction(onSuccess)){
         onSuccess();
@@ -63,7 +62,7 @@ App.addChild('MoipForm', {
     });
   },
 
-  initialize: function(){
+  activate: function(){
     this.message = this.$('.next_step_after_valid_document .alert-danger');
     this.backerId = $('input#backer_id').val();
     this.projectId = $('input#project_id').val();

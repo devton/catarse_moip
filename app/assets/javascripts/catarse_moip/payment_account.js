@@ -1,4 +1,4 @@
-CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
+App.views.MoipForm.addChild('PaymentAccount', _.extend({
   el: '#payment_type_account_section',
 
   events: {
@@ -8,8 +8,8 @@ CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
     'click .link_content a' : 'onContentClick',
   },
 
-  initialize: function(options){
-    this.moipForm = options.moipForm;
+  activate: function(){
+    this.moipForm = this.parent;
     this.$('input#user_document_account').mask("999.999.999-99");
   },
 
@@ -33,5 +33,5 @@ CATARSE.PaymentAccount = CATARSE.UserDocument.extend({
       MoipWidget(settings);
     });
   }
-});
+}, App.views.MoipForm.UserDocument));
 

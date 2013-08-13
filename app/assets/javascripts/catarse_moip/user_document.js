@@ -1,5 +1,4 @@
-CATARSE.UserDocument = Backbone.View.extend({
-
+App.views.MoipForm.UserDocument = {
   onContentClick: function(e){
     window.setTimeout(function(){
       this.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
@@ -107,6 +106,6 @@ CATARSE.UserDocument = Backbone.View.extend({
         else
           return false;
   }
-});
+};
 
 

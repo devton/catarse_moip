@@ -1,4 +1,4 @@
-CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
+App.views.MoipForm.addChild('PaymentSlip', _.extend({
   el: '#payment_type_boleto_section',
 
   events: {
@@ -32,5 +32,4 @@ CATARSE.PaymentSlip = CATARSE.UserDocument.extend({
       MoipWidget(settings);
     });
   }
-});
-
+}, App.views.MoipForm.UserDocument));
