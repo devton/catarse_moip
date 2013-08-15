@@ -8,9 +8,9 @@ require "catarse_moip/version"
 Gem::Specification.new do |s|
   s.name        = "catarse_moip"
   s.version     = CatarseMoip::VERSION
-  s.authors     = ["Antônio Roberto Silva"]
-  s.email       = ["forevertonny@gmail.com"]
-  s.homepage    = "http://github.com/devton/catarse_moip"
+  s.authors     = ["Antônio Roberto Silva", "Diogo Biazus", "Josemar Davi Luedke"]
+  s.email       = ["forevertonny@gmail.com", "diogob@gmail.com", "josemarluedke@gmail.com"]
+  s.homepage    = "http://github.com/catarse/catarse_moip"
   s.summary     = "MoIP integration with Catarse"
   s.description = "MoIP integration with Catarse crowdfunding platform"
 
