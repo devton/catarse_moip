@@ -14,7 +14,6 @@ App.addChild('MoipForm', {
           that.checkoutFailure({Code: 0, Mensagem: response.get_token_response.message});
         }
         else{
-          $('#catarse_moip_form').prepend(response.widget_tag);
           that.createMoipWidget(response);
           if(_.isFunction(onSuccess)){
             onSuccess(response);
