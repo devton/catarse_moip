@@ -15,12 +15,24 @@ App.addChild('MoipForm', {
         }
         else{
           $('#catarse_moip_form').prepend(response.widget_tag);
+          that.createMoipWidget(response);
           if(_.isFunction(onSuccess)){
             onSuccess(response);
           }
         }
       });
     }
+  },
+
+  createMoipWidget: function(data) {
+    widget_tag = $("<div/>").attr({
+      id: data.widget_tag.tag_id,
+      'data-token': data.widget_tag.token,
+      'callback-method-success': data.widget_tag.callback_success,
+      'callback-method-error': data.widget_tag.callback_error,
+    });
+
+    $("#catarse_moip_form").prepend(widget_tag);
   },
 
   checkoutFailure: function(data) {
