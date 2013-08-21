@@ -1,7 +1,7 @@
 App.views.MoipForm.UserDocument = {
   onContentClick: function(e){
     window.setTimeout(function(){
-      this.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
+      app.moipForm.checkoutSuccessful({'StatusPagamento': 'Success'});
     }, 2000);
   },
 
