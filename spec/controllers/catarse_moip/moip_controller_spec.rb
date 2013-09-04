@@ -6,13 +6,13 @@ describe CatarseMoip::MoipController do
 
   let(:get_token_response){{:status=>:fail, :code=>"171", :message=>"TelefoneFixo do endereço deverá ser enviado obrigatorio", :id=>"201210192052439150000024698931"}}
   let(:backer){ double('backer', {
-    id: 1, 
-    key: 'backer key', 
-    payment_id: 'payment id', 
-    project: project, 
-    pending?: false, 
-    value: 10, 
-    user: user, 
+    id: 1,
+    key: 'backer key',
+    payment_id: 'payment id',
+    project: project,
+    pending?: false,
+    value: 10,
+    user: user,
     payer_name: 'foo',
     payer_email: 'foo@bar.com',
     address_street: 'test',
@@ -22,7 +22,13 @@ describe CatarseMoip::MoipController do
     address_city: '123',
     address_state: '123',
     address_zip_code: '123',
-    address_phone_number: '123'
+    address_phone_number: '123',
+    confirmed?: true,
+    confirm!: true,
+    canceled?: true,
+    cancel!: true,
+    refunded?: true,
+    refund!: true
   }) }
 
   let(:user){ double('user', id: 1) }
@@ -53,8 +59,39 @@ describe CatarseMoip::MoipController do
 
     context "when we seach for an existing backer" do
       before do
+        controller.stub(:params).and_return({:id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification"})
         PaymentEngines.should_receive(:find_payment).with(key: backer.key).and_return(backer)
-        controller.should_receive(:process_moip_message).with({"id_transacao"=>backer.key, "controller"=>"catarse_moip/moip", "action"=>"create_notification"})
+        controller.should_receive(:process_moip_message)
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
+
+    context "when receive ordered notification for backer" do
+      before do
+        controller.stub(:params).and_return({:cod_moip => 125, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 5})
+        backer.stub(:payment_id).and_return('123')
+
+        controller.should_receive(:process_moip_message).and_call_original
+        backer.should_receive(:update_attributes).with(payment_id: 125)
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
+
+    context "when receive a unordered notification for backer" do
+      before do
+        controller.stub(:params).and_return({:cod_moip => 122, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 5})
+        backer.stub(:payment_id).and_return('123')
+
+        controller.should_receive(:process_moip_message).and_call_original
+        backer.should_not_receive(:update_attributes).with(payment_id: 122)
         post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
       end
 
@@ -69,7 +106,7 @@ describe CatarseMoip::MoipController do
 
     context "when the content of get_javascript_url raises an error" do
       before do
-        controller.should_receive(:open).at_least(3).times.and_raise('error') 
+        controller.should_receive(:open).at_least(3).times.and_raise('error')
         ->{
           get :js, locale: :pt, use_route: 'catarse_moip'
         }.should raise_error('error')
@@ -79,7 +116,7 @@ describe CatarseMoip::MoipController do
 
     context "when the content of get_javascript_url is read without errors" do
       before do
-        controller.should_receive(:open).and_return(file) 
+        controller.should_receive(:open).and_return(file)
         file.should_receive(:set_encoding).and_return(file)
         file.should_receive(:read).and_return(file)
         file.should_receive(:encode).and_return('js content')
@@ -93,7 +130,7 @@ describe CatarseMoip::MoipController do
   describe "POST moip_response" do
     let(:processor){ double('moip processor') }
     before do
-      controller.should_receive(:process_moip_message)
+      controller.should_receive(:first_update_backer)
       post :moip_response, id: backer.id, response: {StatusPagamento: 'Sucesso'}, use_route: 'catarse_moip'
     end
 
@@ -109,23 +146,10 @@ describe CatarseMoip::MoipController do
     its(:body){ should == "{\"get_token_response\":{\"status\":\"fail\",\"code\":\"171\",\"message\":\"TelefoneFixo do endereço deverá ser enviado obrigatorio\",\"id\":\"201210192052439150000024698931\"},\"moip\":\"{}\",\"widget_tag\":{\"tag_id\":\"MoipWidget\",\"token\":null,\"callback_success\":\"checkoutSuccessful\",\"callback_error\":\"checkoutFailure\"}}" }
   end
 
-  describe "#update_backer" do
+  describe "#first_update_backer" do
     before do
       controller.stub(:backer).and_return(backer)
       backer.stub(:payment_token).and_return('token')
-    end
-
-    context "with parameters containing CodigoMoIP and TaxaMoIP" do
-      let(:payment){ {"Status" => "Autorizado","Codigo" => "0","CodigoRetorno" => "0","TaxaMoIP" => "1.54","StatusPagamento" => "Sucesso","CodigoMoIP" => "18093844","Mensagem" => "Requisição processada com sucesso","TotalPago" => "25.00","url" => "https => //www.moip.com.br/Instrucao.do?token=R2W0N123E005F2A911V6O2I0Y3S7M4J853H0S0F0T0D044T8F4H4E9G0I3W8"} }
-      before do
-        MoIP.should_not_receive(:query)
-        backer.should_receive(:update_attributes).with({
-          payment_id: payment["CodigoMoIP"],
-          payment_choice: payment["FormaPagamento"],
-          payment_service_fee: payment["TaxaMoIP"]
-        })
-      end
-      it("should call update attributes but not call MoIP.query"){ controller.update_backer payment }
     end
 
     context "with no response from moip" do
@@ -134,7 +158,7 @@ describe CatarseMoip::MoipController do
         MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         backer.should_not_receive(:update_attributes)
       end
-      it("should never call update attributes"){ controller.update_backer }
+      it("should never call update attributes"){ controller.first_update_backer }
     end
 
     context "with an incomplete transaction" do
@@ -145,7 +169,7 @@ describe CatarseMoip::MoipController do
         MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         backer.should_not_receive(:update_attributes)
       end
-      it("should never call update attributes"){ controller.update_backer }
+      it("should never call update attributes"){ controller.first_update_backer }
     end
 
     context "with a real data set that works for some cases" do
@@ -161,7 +185,7 @@ describe CatarseMoip::MoipController do
           payment_service_fee: payment["TaxaMoIP"]
         })
       end
-      it("should call update attributes"){ controller.update_backer }
+      it("should call update attributes"){ controller.first_update_backer }
     end
   end
 
@@ -173,57 +197,41 @@ describe CatarseMoip::MoipController do
       controller.stub(:update_backer)
     end
 
-    context "when we already have the payment_id in backers table" do
-      before do
-        backer.stub(:payment_id).and_return('test')
-        controller.should_not_receive(:update_backer)
-      end
-
-      it 'should never call update_backer' do
-        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
-      end
-    end
-
-    context "when we still do not have the payment_id in backers table" do
-      before do
-        backer.stub(:payment_id).and_return(nil)
-        controller.should_receive(:update_backer)
-      end
-
-      it 'should call update_backer on the processor' do
-        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
-      end
-    end
-
     context "when there is a written back request and backer is not refunded" do
       before do
+        controller.stub(:params).and_return(post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::WRITTEN_BACK}))
         backer.stub(:refunded?).and_return(false)
         backer.should_receive(:refund!)
+        backer.should_receive(:update_attributes)
       end
 
       it 'should call refund!' do
-        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::WRITTEN_BACK})
+        controller.process_moip_message
       end
     end
 
     context "when there is an authorized request" do
       before do
+        controller.stub(:params).and_return(post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED}))
         backer.should_receive(:confirm!)
+        backer.should_receive(:update_attributes)
       end
 
       it 'should call confirm!' do
-        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED})
+        controller.process_moip_message
       end
     end
 
     context "when there is a refund request" do
       before do
+        controller.stub(:params).and_return(post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::REFUNDED}))
         backer.stub(:refunded?).and_return(false)
         backer.should_receive(:refund!)
+        backer.should_receive(:update_attributes)
       end
 
       it 'should mark refunded to true' do
-        controller.process_moip_message post_moip_params.merge!({:id_transacao => backer.key, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::REFUNDED})
+        controller.process_moip_message
       end
     end
   end
