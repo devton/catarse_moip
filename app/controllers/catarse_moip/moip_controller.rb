@@ -46,7 +46,7 @@ module CatarseMoip
 
     def moip_response
       @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
-      first_update_backer params[:response] unless params[:response]['StatusPagamento'] == 'Falha'
+      first_update_backer unless params[:response]['StatusPagamento'] == 'Falha'
       render nothing: true, status: 200
     end
 
