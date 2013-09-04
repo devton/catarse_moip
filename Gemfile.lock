@@ -10,7 +10,7 @@ GIT
 PATH
   remote: .
   specs:
-    catarse_moip (2.0.1)
+    catarse_moip (2.0.2)
       libxml-ruby (~> 2.6.0)
       rails (~> 4.0)
 
@@ -63,7 +63,7 @@ GEM
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    mime-types (1.24)
+    mime-types (1.25)
     minitest (4.7.5)
     multi_json (1.7.9)
     nokogiri (1.5.10)
