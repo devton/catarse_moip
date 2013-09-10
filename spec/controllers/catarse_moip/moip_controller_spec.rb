@@ -179,6 +179,7 @@ describe CatarseMoip::MoipController do
       before do
         MoIP.should_receive(:query).with(backer.payment_token).and_return(moip_query_response)
         payment = moip_query_response["Autorizacao"]["Pagamento"].first
+        backer.should_receive(:confirm!)
         backer.should_receive(:update_attributes).with({
           payment_id: payment["CodigoMoIP"],
           payment_choice: payment["FormaPagamento"],
