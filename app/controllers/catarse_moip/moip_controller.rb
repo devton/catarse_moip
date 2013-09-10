@@ -93,6 +93,11 @@ module CatarseMoip
       if response && response["Autorizacao"]
         params = response["Autorizacao"]["Pagamento"]
         params = params.first unless params.respond_to?(:key)
+
+        if params["Status"] == "Autorizado"
+          backer.confirm!
+        end
+
         backer.update_attributes({
           :payment_id => params["CodigoMoIP"],
           :payment_choice => params["FormaPagamento"],
