@@ -85,6 +85,21 @@ describe CatarseMoip::MoipController do
       it("should assign backer"){ assigns(:backer).should == backer }
     end
 
+    context "when we receive a notification with the same payment id but with another status" do
+      before do
+        controller.stub(:params).and_return({:cod_moip => 123, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 1})
+        backer.stub(:payment_id).and_return('123')
+
+        controller.should_receive(:process_moip_message).and_call_original
+        backer.should_receive(:update_attributes).with(payment_id: 123)
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
+
     context "when receive a unordered notification for backer" do
       before do
         controller.stub(:params).and_return({:cod_moip => 122, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 5})
