@@ -122,8 +122,6 @@ module CatarseMoip
             backer.refund! unless backer.refunded?
           when TransactionStatus::CANCELED
             backer.cancel! unless backer.canceled?
-          else
-            backer.waiting! if backer.pending?
           end
         end
       end
