@@ -114,6 +114,21 @@ describe CatarseMoip::MoipController do
       its(:status){ should == 200 }
       it("should assign backer"){ assigns(:backer).should == backer }
     end
+
+    context "when backer payment_id is null" do
+      before do
+        controller.stub(:params).and_return({:cod_moip => 122, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 5})
+        backer.stub(:payment_id).and_return(nil)
+
+        controller.should_receive(:process_moip_message).and_call_original
+        backer.should_receive(:update_attributes).with(payment_id: 122)
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
   end
 
   describe "GET js" do
