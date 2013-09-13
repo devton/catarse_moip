@@ -119,7 +119,9 @@ module CatarseMoip
       PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
 
       backer.with_lock do
-        if backer.payment_id.gsub(".", "").to_i <= params[:cod_moip].to_i
+        payment_id = (backer.payment_id.gsub(".", "").to_i rescue 0)
+
+        if payment_id <= params[:cod_moip].to_i
           backer.update_attributes payment_id: params[:cod_moip]
 
           case params[:status_pagamento].to_i
