@@ -94,22 +94,23 @@ module CatarseMoip
         params = response["Autorizacao"]["Pagamento"]
         params = params.first unless params.respond_to?(:key)
 
-        if params["Status"] == "Autorizado"
-          backer.confirm!
-        end
+        backer.with_lock do
+          if params["Status"] == "Autorizado"
+            backer.confirm!
+          end
 
-        backer.update_attributes({
-          :payment_id => params["CodigoMoIP"],
-          :payment_choice => params["FormaPagamento"],
-          :payment_service_fee => params["TaxaMoIP"]
-        }) if params
+          backer.update_attributes({
+            :payment_id => params["CodigoMoIP"],
+            :payment_choice => params["FormaPagamento"],
+            :payment_service_fee => params["TaxaMoIP"]
+          }) if params
+        end
       end
     end
 
     def process_moip_message
-      PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
-
       backer.with_lock do
+        PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
         payment_id = (backer.payment_id.gsub(".", "").to_i rescue 0)
 
         if payment_id <= params[:cod_moip].to_i
