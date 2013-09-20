@@ -97,6 +97,8 @@ module CatarseMoip
         backer.with_lock do
           if params["Status"] == "Autorizado"
             backer.confirm!
+          elsif backer.pending?
+            backer.waiting! 
           end
 
           backer.update_attributes({
@@ -123,6 +125,8 @@ module CatarseMoip
             backer.refund! unless backer.refunded?
           when TransactionStatus::CANCELED
             backer.cancel! unless backer.canceled?
+          else
+            backer.waiting! if backer.pending?
           end
         end
       end
