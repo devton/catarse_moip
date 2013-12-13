@@ -22,7 +22,7 @@ module CatarseMoip
 
     def create_notification
       @backer = PaymentEngines.find_payment key: params[:id_transacao]
-      process_moip_message
+      process_moip_message if @backer.payment_method == 'MoIP' || @backer.payment_method.nil?
       return render :nothing => true, :status => 200
     rescue Exception => e
       return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
@@ -113,6 +113,7 @@ module CatarseMoip
           backer.update_attributes({
             :payment_id => params["CodigoMoIP"],
             :payment_choice => params["FormaPagamento"],
+            :payment_method => 'MoIP',
             :payment_service_fee => params["TaxaMoIP"]
           }) if params
         end

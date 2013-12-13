@@ -28,7 +28,8 @@ describe CatarseMoip::MoipController do
     canceled?: true,
     cancel!: true,
     refunded?: true,
-    refund!: true
+    refund!: true,
+    payment_method: 'MoIP'
   }) }
 
   let(:user){ double('user', id: 1) }
@@ -107,6 +108,20 @@ describe CatarseMoip::MoipController do
 
         controller.should_receive(:process_moip_message).and_call_original
         backer.should_not_receive(:update_attributes).with(payment_id: 122)
+        post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
+      end
+
+      its(:body){ should == ' ' }
+      its(:status){ should == 200 }
+      it("should assign backer"){ assigns(:backer).should == backer }
+    end
+
+    context "when backer payment_method is PayPal" do
+      before do
+        controller.stub(:params).and_return({:cod_moip => 125, :id_transacao =>backer.key, :controller => "catarse_moip/moip", :action => "create_notification", :status_pagamento => 5})
+        backer.stub(:payment_method).and_return('PayPal')
+
+        controller.should_not_receive(:process_moip_message)
         post :create_notification, {:id_transacao => backer.key, :use_route => 'catarse_moip'}
       end
 
@@ -213,6 +228,7 @@ describe CatarseMoip::MoipController do
         backer.should_receive(:update_attributes).with({
           payment_id: payment["CodigoMoIP"],
           payment_choice: payment["FormaPagamento"],
+          payment_method: 'MoIP',
           payment_service_fee: payment["TaxaMoIP"]
         })
       end
