@@ -12,8 +12,9 @@
           = radio_button_tag 'payment_type', "boleto"
           = label_tag :payment_type_boleto, 'Boleto', :class => "boleto"
   
-          = radio_button_tag 'payment_type', "account"
-          = label_tag :payment_type_account, 'Débito em Conta', :class => "account"
+          /
+            = radio_button_tag 'payment_type', "account"
+            = label_tag :payment_type_account, 'Débito em Conta', :class => "account"
 
       #payment_type_cards_section.payment_section
         h3= t('projects.backers.review.form.labels.payment_card')
@@ -83,22 +84,23 @@
         p.subtitle.hide= t('projects.backers.review.form.labels.payment_boleto_subtitle')
         .link_content
 
-      #payment_type_account_section.hide.payment_section
-        h3= t('projects.backers.review.form.labels.payment_account')
-        .clearfix
-        .bootstrap-twitter style="float: none;"
-          .alert.alert-danger.hide
-            p.error_msg
-            .clearfix
-        .bootstrap-twitter
-          = label_tag 'user_document_account', t('projects.backers.review.form.labels.document')
-          = text_field_tag 'user_document_account', nil, { autocomplete: 'off' }
-          = label_tag :account, t('projects.backers.review.form.labels.select_account')
-          = select_tag :account, options_for_select([['Banco do Brasil', 'BancoDoBrasil'], ['Bradesco'], ['Banrisul'], ['Itaú', 'Itau'] ]), :include_blank => true
-          .loader.hide= image_tag('loading.gif')
-          = submit_tag t('projects.backers.review.form.labels.submit'), :class => 'btn btn-primary btn-large', :id => "build_account_link", :disabled => true
-        p.subtitle.hide= t('projects.backers.review.form.labels.select_account')
-        .link_content
+      /
+        #payment_type_account_section.hide.payment_section
+          h3= t('projects.backers.review.form.labels.payment_account')
+          .clearfix
+          .bootstrap-twitter style="float: none;"
+            .alert.alert-danger.hide
+              p.error_msg
+              .clearfix
+          .bootstrap-twitter
+            = label_tag 'user_document_account', t('projects.backers.review.form.labels.document')
+            = text_field_tag 'user_document_account', nil, { autocomplete: 'off' }
+            = label_tag :account, t('projects.backers.review.form.labels.select_account')
+            = select_tag :account, options_for_select([['Banco do Brasil', 'BancoDoBrasil'], ['Bradesco'], ['Banrisul'], ['Itaú', 'Itau'] ]), :include_blank => true
+            .loader.hide= image_tag('loading.gif')
+            = submit_tag t('projects.backers.review.form.labels.submit'), :class => 'btn btn-primary btn-large', :id => "build_account_link", :disabled => true
+          p.subtitle.hide= t('projects.backers.review.form.labels.select_account')
+          .link_content
 
   
 
