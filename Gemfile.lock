@@ -11,6 +11,7 @@ PATH
   remote: .
   specs:
     catarse_moip (2.1.9)
+      enumerate_it
       libxml-ruby (~> 2.6.0)
       rails (~> 4.0)
 
@@ -121,7 +122,6 @@ PLATFORMS
 DEPENDENCIES
   catarse_moip!
   database_cleaner
-  enumerate_it
   factory_girl_rails
   moip!
   pg

@@ -1,3 +1,4 @@
+require 'enumerate_it'
 require 'moip_transparente'
 
 module CatarseMoip
