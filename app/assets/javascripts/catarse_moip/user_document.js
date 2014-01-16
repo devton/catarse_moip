@@ -23,8 +23,10 @@ App.views.MoipForm.UserDocument = {
      if(resultCpf || resultCnpj) {
         $documentField.addClass('ok').removeClass('error');
 
-        $.post('/projects/' + this.moipForm.projectId + '/backers/' + this.moipForm.backerId + '/update_info', {
-          backer: { payer_document: documentNumber }
+        $.ajax({
+          url: '/projects/' + this.moipForm.projectId + '/backers/' + this.moipForm.backerId,
+          type: 'PUT',
+          data: { backer: { payer_document: documentNumber } }
         });
 
       } else {
