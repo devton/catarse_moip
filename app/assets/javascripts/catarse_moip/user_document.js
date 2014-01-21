@@ -24,9 +24,9 @@ App.views.MoipForm.UserDocument = {
         $documentField.addClass('ok').removeClass('error');
 
         $.ajax({
-          url: '/projects/' + this.moipForm.projectId + '/backers/' + this.moipForm.backerId,
+          url: '/projects/' + this.moipForm.projectId + '/contributions/' + this.moipForm.contributionId,
           type: 'PUT',
-          data: { backer: { payer_document: documentNumber } }
+          data: { contribution: { payer_document: documentNumber } }
         });
 
       } else {
