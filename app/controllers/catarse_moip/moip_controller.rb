@@ -3,7 +3,7 @@ require 'moip_transparente'
 
 module CatarseMoip
   class MoipController < ApplicationController
-    attr_accessor :backer
+    attr_accessor :contribution
 
     class TransactionStatus < ::EnumerateIt::Base
       associate_values(
@@ -22,8 +22,8 @@ module CatarseMoip
     layout :false
 
     def create_notification
-      @backer = PaymentEngines.find_payment key: params[:id_transacao]
-      process_moip_message if @backer.payment_method == 'MoIP' || @backer.payment_method.nil?
+      @contribution = PaymentEngines.find_payment key: params[:id_transacao]
+      process_moip_message if @contribution.payment_method == 'MoIP' || @contribution.payment_method.nil?
       return render :nothing => true, :status => 200
     rescue Exception => e
       return render :text => "#{e.inspect}: #{e.message} recebemos: #{params}", :status => 422
@@ -46,13 +46,13 @@ module CatarseMoip
     end
 
     def moip_response
-      @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
-      first_update_backer unless params[:response]['StatusPagamento'] == 'Falha'
+      @contribution = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
+      first_update_contribution unless params[:response]['StatusPagamento'] == 'Falha'
       render nothing: true, status: 200
     end
 
     def get_moip_token
-      @backer = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
+      @contribution = PaymentEngines.find_payment id: params[:id], user_id: current_user.id
 
       ::MoipTransparente::Config.test = (PaymentEngines.configuration[:moip_test] == 'true')
       ::MoipTransparente::Config.access_token = PaymentEngines.configuration[:moip_token]
@@ -61,30 +61,30 @@ module CatarseMoip
       @moip = ::MoipTransparente::Checkout.new
 
       invoice = {
-        razao: "Apoio para o projeto '#{backer.project.name}'",
-        id: backer.key,
-        total: backer.value.to_s,
+        razao: "Apoio para o projeto '#{contribution.project.name}'",
+        id: contribution.key,
+        total: contribution.value.to_s,
         acrescimo: '0.00',
         desconto: '0.00',
         cliente: {
-          id: backer.user.id,
-          nome: backer.payer_name,
-          email: backer.payer_email,
-          logradouro: "#{backer.address_street}, #{backer.address_number}",
-          complemento: backer.address_complement,
-          bairro: backer.address_neighbourhood,
-          cidade: backer.address_city,
-          uf: backer.address_state,
-          cep: backer.address_zip_code,
-          telefone: backer.address_phone_number
+          id: contribution.user.id,
+          nome: contribution.payer_name,
+          email: contribution.payer_email,
+          logradouro: "#{contribution.address_street}, #{contribution.address_number}",
+          complemento: contribution.address_complement,
+          bairro: contribution.address_neighbourhood,
+          cidade: contribution.address_city,
+          uf: contribution.address_state,
+          cep: contribution.address_zip_code,
+          telefone: contribution.address_phone_number
         }
       }
 
       response = @moip.get_token(invoice)
 
-      session[:thank_you_id] = backer.project.id
+      session[:thank_you_id] = contribution.project.id
 
-      backer.update_column :payment_token, response[:token] if response and response[:token]
+      contribution.update_column :payment_token, response[:token] if response and response[:token]
 
       render json: {
         get_token_response: response,
@@ -98,20 +98,20 @@ module CatarseMoip
       }
     end
 
-    def first_update_backer
-      response = ::MoIP.query(backer.payment_token)
+    def first_update_contribution
+      response = ::MoIP.query(contribution.payment_token)
       if response && response["Autorizacao"]
         params = response["Autorizacao"]["Pagamento"]
         params = params.first unless params.respond_to?(:key)
 
-        backer.with_lock do
+        contribution.with_lock do
           if params["Status"] == "Autorizado"
-            backer.confirm!
-          elsif backer.pending?
-            backer.waiting! 
+            contribution.confirm!
+          elsif contribution.pending?
+            contribution.waiting!
           end
 
-          backer.update_attributes({
+          contribution.update_attributes({
             :payment_id => params["CodigoMoIP"],
             :payment_choice => params["FormaPagamento"],
             :payment_method => 'MoIP',
@@ -122,20 +122,20 @@ module CatarseMoip
     end
 
     def process_moip_message
-      backer.with_lock do
-        PaymentEngines.create_payment_notification backer_id: backer.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
-        payment_id = (backer.payment_id.gsub(".", "").to_i rescue 0)
+      contribution.with_lock do
+        PaymentEngines.create_payment_notification contribution_id: contribution.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
+        payment_id = (contribution.payment_id.gsub(".", "").to_i rescue 0)
 
         if payment_id <= params[:cod_moip].to_i
-          backer.update_attributes payment_id: params[:cod_moip]
+          contribution.update_attributes payment_id: params[:cod_moip]
 
           case params[:status_pagamento].to_i
           when TransactionStatus::AUTHORIZED
-            backer.confirm! unless backer.confirmed?
+            contribution.confirm! unless contribution.confirmed?
           when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
-            backer.refund! unless backer.refunded?
+            contribution.refund! unless contribution.refunded?
           when TransactionStatus::CANCELED
-            backer.cancel! unless backer.canceled?
+            contribution.cancel! unless contribution.canceled?
           end
         end
       end

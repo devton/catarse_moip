@@ -8,7 +8,7 @@ App.addChild('MoipForm', {
         onSuccess();
       }
     } else {
-      $.post('/payment/moip/' + this.backerId + '/get_moip_token').success(function(response, textStatus){
+      $.post('/payment/moip/' + this.contributionId + '/get_moip_token').success(function(response, textStatus){
         that.paymentChoice.$('input').attr('disabled', 'disabled');
         if(response.get_token_response.status == 'fail'){
           that.checkoutFailure({Code: 0, Mensagem: response.get_token_response.message});
@@ -47,7 +47,7 @@ App.addChild('MoipForm', {
 
   checkoutSuccessful: function(data) {
     var that = this;
-    $.post('/payment/moip/' + this.backerId + '/moip_response', {response: data}).success(function(){
+    $.post('/payment/moip/' + this.contributionId + '/moip_response', {response: data}).success(function(){
       that.loader.hide();
       // Bail out when get an error from MoIP
       if(data.Status == 'Cancelado'){
@@ -75,7 +75,7 @@ App.addChild('MoipForm', {
 
   activate: function(){
     this.message = this.$('.next_step_after_valid_document .alert-danger');
-    this.backerId = $('input#backer_id').val();
+    this.contributionId = $('input#contribution_id').val();
     this.projectId = $('input#project_id').val();
 
     this.loader = this.$('.loader');
