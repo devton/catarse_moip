@@ -123,13 +123,15 @@ module CatarseMoip
 
     def process_moip_message
       contribution.with_lock do
-        PaymentEngines.create_payment_notification contribution_id: contribution.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
+        payment_notification = PaymentEngines.create_payment_notification contribution_id: contribution.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
         payment_id = (contribution.payment_id.gsub(".", "").to_i rescue 0)
 
         if payment_id <= params[:cod_moip].to_i
           contribution.update_attributes payment_id: params[:cod_moip]
 
           case params[:status_pagamento].to_i
+          when TransactionStatus::PROCESS
+            payment_notification.deliver_process_notification
           when TransactionStatus::AUTHORIZED
             contribution.confirm! unless contribution.confirmed?
           when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED

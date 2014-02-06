@@ -35,6 +35,7 @@ describe CatarseMoip::MoipController do
   let(:user){ double('user', id: 1) }
   let(:project){ double('project', id: 1, name: 'test project') }
   let(:extra_data){ {"id_transacao"=>contribution.key, "valor"=>"2190", "cod_moip"=>"12345123", "forma_pagamento"=>"1", "tipo_pagamento"=>"CartaoDeCredito", "email_consumidor"=>"some@email.com", "controller"=>"catarse_moip/payment/notifications", "action"=>"create"} }
+  let(:payment_notification) {}
 
   before do
     controller.stub(:current_user).and_return(user)
@@ -43,11 +44,34 @@ describe CatarseMoip::MoipController do
     ::MoipTransparente::Checkout.any_instance.stub(:moip_javascript_tag).and_return('<script>')
     ::MoipTransparente::Checkout.any_instance.stub(:as_json).and_return('{}')
     PaymentEngines.stub(:find_payment).and_return(contribution)
-    PaymentEngines.stub(:create_payment_notification)
+    PaymentEngines.stub(:create_payment_notification).and_return(payment_notification)
     contribution.stub(:with_lock).and_yield
   end
 
   describe "POST create_notification" do
+    describe "payment notifications" do
+      context "when payment status is processing (6)" do
+
+        let(:payment_notification) do
+          pn = mock()
+          pn.stub(:deliver_process_notification).and_return(true)
+          pn
+        end
+
+        before do
+          contribution.stub(:payment_id).and_return('123')
+          contribution.stub(:update_attributes).and_return(true)
+
+          payment_notification.should_receive(:deliver_process_notification)
+        end
+
+        it("should satisfy expectations") do
+          post :create_notification, {:cod_moip => 125, :id_transacao => contribution.key, :use_route => 'catarse_moip', :status_pagamento => 6}
+        end
+
+      end
+    end
+
     context "when we search for a non-existant contribution" do
       before do
         PaymentEngines.should_receive(:find_payment).with(key: "non-existant contribution key").and_raise('error')
