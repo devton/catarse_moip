@@ -137,7 +137,12 @@ module CatarseMoip
           when TransactionStatus::WRITTEN_BACK, TransactionStatus::REFUNDED
             contribution.refund! unless contribution.refunded?
           when TransactionStatus::CANCELED
-            contribution.cancel! unless contribution.canceled?
+            unless contribution.canceled?
+              contribution.cancel!
+              if contribution.payment_choice.downcase == 'boletobancario'
+                payment_notification.deliver_split_canceled_notification
+              end
+            end
           end
         end
       end

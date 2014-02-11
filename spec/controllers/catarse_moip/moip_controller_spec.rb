@@ -50,6 +50,7 @@ describe CatarseMoip::MoipController do
 
   describe "POST create_notification" do
     describe "payment notifications" do
+
       context "when payment status is processing (6)" do
 
         let(:payment_notification) do
@@ -68,7 +69,44 @@ describe CatarseMoip::MoipController do
         it("should satisfy expectations") do
           post :create_notification, {:cod_moip => 125, :id_transacao => contribution.key, :use_route => 'catarse_moip', :status_pagamento => 6}
         end
+      end
 
+      context "when payment status is canceled and payment is made with Boleto" do
+        let(:payment_notification) do
+          pn = mock()
+          pn.stub(:deliver_split_canceled_notification).and_return(true)
+          pn
+        end
+
+        context "when contribution is made with Boleto" do
+          before do
+            contribution.stub(:payment_choice).and_return('BoletoBancario')
+            contribution.stub(:payment_id).and_return('123')
+            contribution.stub(:update_attributes).and_return(true)
+          end
+
+          context "when is not canceled yet" do
+            before do
+              contribution.stub(:canceled?).and_return(false)
+
+              payment_notification.should_receive(:deliver_split_canceled_notification)
+            end
+
+            it("should satisfy expectations") do
+              post :create_notification, {:cod_moip => 125, :id_transacao => contribution.key, :use_route => 'catarse_moip', :status_pagamento => 5}
+            end
+          end
+
+          context "when is already canceled" do
+            before do
+              payment_notification.should_not_receive(:deliver_split_canceled_notification)
+            end
+
+            it("should satisfy expectations") do
+              post :create_notification, {:cod_moip => 125, :id_transacao => contribution.key, :use_route => 'catarse_moip', :status_pagamento => 5}
+            end
+          end
+        end
       end
     end
 
