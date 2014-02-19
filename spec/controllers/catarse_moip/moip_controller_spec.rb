@@ -74,7 +74,7 @@ describe CatarseMoip::MoipController do
       context "when payment status is canceled and payment is made with Boleto" do
         let(:payment_notification) do
           pn = mock()
-          pn.stub(:deliver_split_canceled_notification).and_return(true)
+          pn.stub(:deliver_slip_canceled_notification).and_return(true)
           pn
         end
 
@@ -89,7 +89,7 @@ describe CatarseMoip::MoipController do
             before do
               contribution.stub(:canceled?).and_return(false)
 
-              payment_notification.should_receive(:deliver_split_canceled_notification)
+              payment_notification.should_receive(:deliver_slip_canceled_notification)
             end
 
             it("should satisfy expectations") do
@@ -99,7 +99,7 @@ describe CatarseMoip::MoipController do
 
           context "when is already canceled" do
             before do
-              payment_notification.should_not_receive(:deliver_split_canceled_notification)
+              payment_notification.should_not_receive(:deliver_slip_canceled_notification)
             end
 
             it("should satisfy expectations") do

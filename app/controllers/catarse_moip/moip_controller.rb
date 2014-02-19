@@ -140,7 +140,7 @@ module CatarseMoip
             unless contribution.canceled?
               contribution.cancel!
               if contribution.payment_choice.downcase == 'boletobancario'
-                payment_notification.deliver_split_canceled_notification
+                payment_notification.deliver_slip_canceled_notification
               end
             end
           end
