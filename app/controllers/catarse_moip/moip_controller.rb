@@ -123,6 +123,7 @@ module CatarseMoip
 
     def process_moip_message
       contribution.with_lock do
+        first_update_contribution if contribution.payment_method.nil?
         payment_notification = PaymentEngines.create_payment_notification contribution_id: contribution.id, extra_data: JSON.parse(params.to_json.force_encoding('iso-8859-1').encode('utf-8'))
         payment_id = (contribution.payment_id.gsub(".", "").to_i rescue 0)
 
