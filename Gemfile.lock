@@ -10,7 +10,7 @@ GIT
 PATH
   remote: .
   specs:
-    catarse_moip (2.3.1)
+    catarse_moip (2.3.2)
       enumerate_it
       libxml-ruby (~> 2.6.0)
       rails (~> 4.0)
