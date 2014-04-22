@@ -130,6 +130,10 @@ module CatarseMoip
         if payment_id <= params[:cod_moip].to_i
           contribution.update_attributes payment_id: params[:cod_moip]
 
+          if (params[:valor].to_i/100.0) < contribution.value && params[:valor]
+            return contribution.invalid! unless contribution.invalid_payment?
+          end
+
           case params[:status_pagamento].to_i
           when TransactionStatus::PROCESS
             payment_notification.deliver_process_notification
