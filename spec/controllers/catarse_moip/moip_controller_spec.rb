@@ -29,7 +29,9 @@ describe CatarseMoip::MoipController do
     cancel!: true,
     refunded?: true,
     refund!: true,
-    payment_method: 'MoIP'
+    payment_method: 'MoIP',
+    invalid!: true,
+    invlid_payment?: true
   }) }
 
   let(:user){ double('user', id: 1) }
@@ -304,6 +306,15 @@ describe CatarseMoip::MoipController do
       contribution.stub(:confirmed?).and_return(false)
       contribution.stub(:confirm!)
       controller.stub(:update_contribution)
+    end
+
+    context "when the value is less that contribution value" do
+      before do
+        controller.stub(:params).and_return(post_moip_params.merge!({:id_transacao => contribution.key, :valor => 9000, :status_pagamento => CatarseMoip::MoipController::TransactionStatus::AUTHORIZED}))
+        contribution.stub(:invalid_payment?).and_return(false)
+        contribution.should_receive(:invalid!)
+        contribution.should_receive(:update_attributes)
+      end
     end
 
     context "when there is a written back request and contribution is not refunded" do
